@@ -25,6 +25,9 @@
 
 如果你有任何建議或改進意見，歡迎在 GitHub 上提交 issue。雖然我不太懂 GitHub 的使用，但我會通過 AI 的幫助盡力更新和維護這個模板。
 
+如在 Deploy 時遇到任何問題，可以到 Github issue 告訴我，我會盡力解決：
+https://github.com/glasschan/seafoodholdhand-zeabur-templates
+
 ## 許可證
 
 本項目採用 MIT 許可證 - 詳情請參閱 LICENSE 文件
