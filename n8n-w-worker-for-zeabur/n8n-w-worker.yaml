@@ -39,7 +39,7 @@ spec:
     This template has been logically designed and tested to work successfully. As a nocode user, I welcome any suggestions or improvements on GitHub. I'll do my best to update the template (with AI's help) since I'm not very familiar with GitHub.
 
     If you encounter any issues during deployment, please let me know via GitHub issues:
-    https://github.com/glasschan/seafoodholdhand-zeabur-templates
+    [https://github.com/glasschan/seafoodholdhand-zeabur-templates](https://github.com/glasschan/seafoodholdhand-zeabur-templates)
   services:
     - name: postgresql
       icon: https://raw.githubusercontent.com/zeabur/service-icons/main/marketplace/postgresql.svg
@@ -352,7 +352,7 @@ localization:
       注意：此模板使用啟用了`N8N_RUNNERS_ENABLED`環境變數的最新版N8N，以提升工作流程執行效率。
 
       如在 Deploy 時遇到任何問題，可以到 Github issue 告訴我，我會盡力解決：
-      https://github.com/glasschan/seafoodholdhand-zeabur-templates
+      [https://github.com/glasschan/seafoodholdhand-zeabur-templates](https://github.com/glasschan/seafoodholdhand-zeabur-templates)
 
   ja-JP:
     description: N8N はワーカーサポートを備えた強力なワークフロー自動化プラットフォームです。
@@ -384,7 +384,7 @@ localization:
       注：このテンプレートは、ワークフロー実行を改善するために`N8N_RUNNERS_ENABLED`環境変数が有効化された最新のN8Nバージョンを使用しています。
 
       デプロイ中に問題が発生した場合は、Github issue で教えてください。できる限り解決します：
-      https://github.com/glasschan/seafoodholdhand-zeabur-templates
+      [https://github.com/glasschan/seafoodholdhand-zeabur-templates](https://github.com/glasschan/seafoodholdhand-zeabur-templates)
 
   zh-CN:
     description: N8N 是一个强大的工作流程自动化平台，具有工作进程支持功能。
@@ -416,4 +416,4 @@ localization:
       注意：此模板使用启用了`N8N_RUNNERS_ENABLED`环境变量的最新版N8N，以提升工作流程执行效率。
 
       如在 Deploy 时遇到任何问题，可以到 Github issue 告诉我，我会尽力解决：
-      https://github.com/glasschan/seafoodholdhand-zeabur-templates
+      [https://github.com/glasschan/seafoodholdhand-zeabur-templates](https://github.com/glasschan/seafoodholdhand-zeabur-templates)
