@@ -1,0 +1,405 @@
+apiVersion: zeabur.com/v1
+kind: Template
+metadata:
+  name: N8N with Worker
+spec:
+  description: A powerful workflow automation platform with worker support
+  icon: https://i.imgur.com/KUcP61Z.png
+  coverImage: https://i.imgur.com/Hm4GdsP.png
+  variables:
+    - key: PUBLIC_DOMAIN
+      type: DOMAIN
+      name: Domain
+      description: What is the domain you want for your N8N instance?
+  tags:
+    - Automation
+    - Workflow
+  readme: |-
+    # N8N with Worker 1-Click Template (create by SEAFOODHOLDHAND)
+
+    [![N8N with Worker](https://i.imgur.com/gi4FDrn.png)](https://www.youtube.com/@seafoodholdhand)
+
+    N8N is a powerful workflow automation platform that helps you connect different services and automate tasks. This template includes:
+
+    - N8N main instance for workflow management (latest version)
+    - N8N worker for processing background tasks
+    - PostgreSQL database for data storage
+    - Redis for queue management
+
+    With N8N, you can:
+    - Create automated workflows
+    - Connect to hundreds of services
+    - Process data and automate tasks
+    - Handle background jobs efficiently
+
+    The worker setup ensures better performance and reliability for your automation tasks.
+
+    Note: This template uses the latest N8N version with the `N8N_RUNNERS_ENABLED` environment variable enabled for improved workflow execution.
+  services:
+    - name: postgresql
+      icon: https://raw.githubusercontent.com/zeabur/service-icons/main/marketplace/postgresql.svg
+      template: PREBUILT_V2
+      spec:
+        source:
+          image: postgres:17
+          command:
+            - docker-entrypoint.sh
+            - -c
+            - config_file=/etc/postgresql/postgresql.conf
+        ports:
+          - id: database
+            port: 5432
+            type: TCP
+        volumes:
+          - id: data
+            dir: /var/lib/postgresql/data
+        instructions:
+          - type: TEXT
+            title: Connection String
+            content: postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@${PORT_FORWARDED_HOSTNAME}:${DATABASE_PORT_FORWARDED_PORT}/${POSTGRES_DATABASE}
+          - type: TEXT
+            title: PostgreSQL Connect Command
+            content: psql "postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@${PORT_FORWARDED_HOSTNAME}:${DATABASE_PORT_FORWARDED_PORT}/${POSTGRES_DATABASE}"
+          - type: TEXT
+            title: PostgreSQL username
+            content: ${POSTGRES_USERNAME}
+            category: Credentials
+          - type: PASSWORD
+            title: PostgresSQL password
+            content: ${POSTGRES_PASSWORD}
+            category: Credentials
+          - type: TEXT
+            title: PostgresSQL database
+            content: ${POSTGRES_DATABASE}
+            category: Credentials
+          - type: TEXT
+            title: PostgreSQL host
+            content: ${PORT_FORWARDED_HOSTNAME}
+            category: Hostname & Port
+          - type: TEXT
+            title: PostgreSQL port
+            content: ${DATABASE_PORT_FORWARDED_PORT}
+            category: Hostname & Port
+        env:
+          PGDATA:
+            default: /var/lib/postgresql/data/pgdata
+            expose: false
+          POSTGRES_CONNECTION_STRING:
+            default: postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}
+            expose: false
+          POSTGRES_DATABASE:
+            default: ${POSTGRES_DB}
+            expose: true
+          POSTGRES_DB:
+            default: zeabur
+            expose: true
+          POSTGRES_HOST:
+            default: ${CONTAINER_HOSTNAME}
+            expose: true
+          POSTGRES_PASSWORD:
+            default: ${PASSWORD}
+            expose: true
+          POSTGRES_PORT:
+            default: ${DATABASE_PORT}
+            expose: true
+          POSTGRES_URI:
+            default: ${POSTGRES_CONNECTION_STRING}
+            expose: true
+          POSTGRES_USER:
+            default: root
+            expose: false
+          POSTGRES_USERNAME:
+            default: ${POSTGRES_USER}
+            expose: true
+        configs:
+          - path: /etc/postgresql/postgresql.conf
+            template: |
+              # https://github.com/postgres/postgres/blob/master/src/backend/utils/misc/postgresql.conf.sample
+              listen_addresses = '*'
+              max_connections = 100
+              shared_buffers = 128MB
+              dynamic_shared_memory_type = posix
+              max_wal_size = 1GB
+              min_wal_size = 80MB
+              log_timezone = 'Etc/UTC'
+              datestyle = 'iso, mdy'
+              timezone = 'Etc/UTC'
+              lc_messages = 'en_US.utf8'
+              lc_monetary = 'en_US.utf8'
+              lc_numeric = 'en_US.utf8'
+              lc_time = 'en_US.utf8'
+              default_text_search_config = 'pg_catalog.english'
+            permission: null
+            envsubst: null
+    - name: n8n
+      icon: https://i.imgur.com/KUcP61Z.png
+      template: PREBUILT_V2
+      spec:
+        source:
+          image: docker.io/n8nio/n8n:latest
+        ports:
+          - id: web
+            port: 5678
+            type: HTTP
+        volumes:
+          - id: data
+            dir: /root/.n8n
+        dependencies:
+          - postgresql
+          - Redis
+        env:
+          DB_POSTGRESDB_DATABASE:
+            default: ${POSTGRES_DB}
+            expose: false
+          DB_POSTGRESDB_HOST:
+            default: ${POSTGRES_HOST}
+            expose: false
+          DB_POSTGRESDB_PASSWORD:
+            default: ${POSTGRES_PASSWORD}
+            expose: false
+          DB_POSTGRESDB_PORT:
+            default: ${POSTGRES_PORT}
+            expose: false
+          DB_POSTGRESDB_USER:
+            default: ${POSTGRES_USERNAME}
+            expose: false
+          DB_TYPE:
+            default: postgresdb
+            expose: false
+          EXECUTIONS_MODE:
+            default: queue
+            expose: false
+          N8N_ENCRYPTION_KEY:
+            default: ${PASSWORD}
+            expose: true
+          N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS:
+            default: "true"
+            expose: false
+          N8N_HOST:
+            default: ${ZEABUR_WEB_DOMAIN}
+            expose: false
+          NODE_ENV:
+            default: production
+            expose: false
+          QUEUE_BULL_REDIS_HOST:
+            default: ${REDIS_HOST}
+            expose: false
+          QUEUE_BULL_REDIS_PASSWORD:
+            default: ${REDIS_PASSWORD}
+            expose: false
+          QUEUE_BULL_REDIS_PORT:
+            default: ${REDIS_PORT}
+            expose: false
+          WEBHOOK_URL:
+            default: ${ZEABUR_WEB_URL}
+            expose: false
+          N8N_RUNNERS_ENABLED:
+            default: "true"
+            expose: false
+        configs: []
+    - name: Redis
+      icon: https://raw.githubusercontent.com/zeabur/service-icons/main/marketplace/redis.svg
+      template: PREBUILT_V2
+      spec:
+        source:
+          image: redis/redis-stack-server:latest
+        ports:
+          - id: database
+            port: 6379
+            type: TCP
+        volumes:
+          - id: data
+            dir: /data
+        instructions:
+          - type: TEXT
+            title: Command to connect to your Redis
+            content: redis-cli -h ${PORT_FORWARDED_HOSTNAME} -p ${DATABASE_PORT_FORWARDED_PORT} -a ${REDIS_PASSWORD}
+          - type: TEXT
+            title: Redis Connection String
+            content: redis://:${REDIS_PASSWORD}@${PORT_FORWARDED_HOSTNAME}:${DATABASE_PORT_FORWARDED_PORT}
+          - type: PASSWORD
+            title: Redis password
+            content: ${REDIS_PASSWORD}
+            category: Credentials
+          - type: TEXT
+            title: Redis host
+            content: ${PORT_FORWARDED_HOSTNAME}
+            category: Hostname & Port
+          - type: TEXT
+            title: Redis port
+            content: ${DATABASE_PORT_FORWARDED_PORT}
+            category: Hostname & Port
+        env:
+          REDIS_ARGS:
+            default: --requirepass ${REDIS_PASSWORD}
+            expose: false
+          REDIS_CONNECTION_STRING:
+            default: redis://:${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_PORT}
+            expose: true
+          REDIS_HOST:
+            default: ${CONTAINER_HOSTNAME}
+            expose: true
+          REDIS_PASSWORD:
+            default: ${PASSWORD}
+            expose: true
+          REDIS_PORT:
+            default: ${DATABASE_PORT}
+            expose: true
+          REDIS_URI:
+            default: ${REDIS_CONNECTION_STRING}
+            expose: true
+        configs: []
+    - name: n8n-worker
+      icon: https://i.imgur.com/KUcP61Z.png
+      template: PREBUILT_V2
+      spec:
+        source:
+          image: docker.io/n8nio/n8n:latest
+          command:
+            - /bin/sh
+          args:
+            - -c
+            - n8n worker
+        volumes:
+          - id: data
+            dir: /root/.n8n
+        dependencies:
+          - n8n
+        env:
+          DB_POSTGRESDB_DATABASE:
+            default: ${POSTGRES_DB}
+            expose: false
+          DB_POSTGRESDB_HOST:
+            default: ${POSTGRES_HOST}
+            expose: false
+          DB_POSTGRESDB_PASSWORD:
+            default: ${POSTGRES_PASSWORD}
+            expose: false
+          DB_POSTGRESDB_PORT:
+            default: ${POSTGRES_PORT}
+            expose: false
+          DB_POSTGRESDB_USER:
+            default: ${POSTGRES_USERNAME}
+            expose: false
+          DB_TYPE:
+            default: postgresdb
+            expose: false
+          EXECUTIONS_MODE:
+            default: queue
+            expose: false
+          N8N_ENCRYPTION_KEY:
+            default: ${N8N_ENCRYPTION_KEY}
+            expose: false
+          N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS:
+            default: "true"
+            expose: false
+          N8N_HOST:
+            default: ${ZEABUR_WEB_DOMAIN}
+            expose: false
+          NODE_ENV:
+            default: production
+            expose: false
+          QUEUE_BULL_REDIS_HOST:
+            default: ${REDIS_HOST}
+            expose: false
+          QUEUE_BULL_REDIS_PASSWORD:
+            default: ${REDIS_PASSWORD}
+            expose: false
+          QUEUE_BULL_REDIS_PORT:
+            default: ${REDIS_PORT}
+            expose: false
+          WEBHOOK_URL:
+            default: ${ZEABUR_WEB_URL}
+            expose: false
+          N8N_RUNNERS_ENABLED:
+            default: "true"
+            expose: false
+        configs: []
+
+localization:
+  zh-TW:
+    description: N8N 是一個強大的工作流程自動化平台，具有工作程序支援功能。
+    variables:
+      - key: PUBLIC_DOMAIN
+        type: DOMAIN
+        name: 網域
+        description: 你想將 N8N 綁在哪個網域上？
+    readme: |-
+      # N8N with Worker 1-Click Template (create by SEAFOODHOLDHAND)
+
+      [![N8N with Worker](https://i.imgur.com/gi4FDrn.png)](https://www.youtube.com/@seafoodholdhand)
+
+      N8N 是一個強大的工作流程自動化平台，可以幫助你連接不同的服務並自動化任務。此模板包含：
+
+      - N8N 主實例用於工作流程管理（最新版本）
+      - N8N 工作程序用於處理背景任務
+      - PostgreSQL 資料庫用於數據存儲
+      - Redis 用於隊列管理
+
+      使用 N8N，你可以：
+      - 創建自動化工作流程
+      - 連接數百種服務
+      - 處理數據並自動化任務
+      - 高效處理背景作業
+
+      工作程序設置確保你的自動化任務具有更好的性能和可靠性。
+
+      注意：此模板使用啟用了`N8N_RUNNERS_ENABLED`環境變數的最新版N8N，以提升工作流程執行效率。
+
+  ja-JP:
+    description: N8N はワーカーサポートを備えた強力なワークフロー自動化プラットフォームです。
+    variables:
+      - key: PUBLIC_DOMAIN
+        type: DOMAIN
+        name: ドメイン
+        description: N8N インスタンスに使用したいドメインは何ですか？
+    readme: |-
+      # N8N with Worker 1-Click Template (create by SEAFOODHOLDHAND)
+
+      [![N8N with Worker](https://i.imgur.com/gi4FDrn.png)](https://www.youtube.com/@seafoodholdhand)
+
+      N8Nは、異なるサービスを接続してタスクを自動化するのに役立つ強力なワークフロー自動化プラットフォームです。このテンプレートには以下が含まれます：
+
+      - ワークフロー管理用のN8Nメインインスタンス（最新バージョン）
+      - バックグラウンドタスク処理用のN8Nワーカー
+      - データストレージ用のPostgreSQLデータベース
+      - キュー管理用のRedis
+
+      N8Nを使用することで、以下のことが可能です：
+      - 自動化されたワークフローの作成
+      - 数百のサービスへの接続
+      - データ処理とタスクの自動化
+      - バックグラウンドジョブの効率的な処理
+
+      ワーカーセットアップにより、自動化タスクのパフォーマンスと信頼性が向上します。
+
+      注：このテンプレートは、ワークフロー実行を改善するために`N8N_RUNNERS_ENABLED`環境変数が有効化された最新のN8Nバージョンを使用しています。
+
+  zh-CN:
+    description: N8N 是一个强大的工作流程自动化平台，具有工作进程支持功能。
+    variables:
+      - key: PUBLIC_DOMAIN
+        type: DOMAIN
+        name: 域名
+        description: 你想将 N8N 绑定在哪个域名上？
+    readme: |-
+      # N8N with Worker 1-Click Template (create by SEAFOODHOLDHAND)
+
+      [![N8N with Worker](https://i.imgur.com/gi4FDrn.png)](https://www.youtube.com/@seafoodholdhand)
+
+      N8N 是一个强大的工作流程自动化平台，可以帮助你连接不同的服务并自动化任务。此模板包含：
+
+      - N8N 主实例用于工作流程管理（最新版本）
+      - N8N 工作进程用于处理后台任务
+      - PostgreSQL 数据库用于数据存储
+      - Redis 用于队列管理
+
+      使用 N8N，你可以：
+      - 创建自动化工作流程
+      - 连接数百种服务
+      - 处理数据并自动化任务
+      - 高效处理后台作业
+
+      工作进程设置确保你的自动化任务具有更好的性能和可靠性。
+
+      注意：此模板使用启用了`N8N_RUNNERS_ENABLED`环境变量的最新版N8N，以提升工作流程执行效率。
