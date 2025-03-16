@@ -34,6 +34,15 @@ spec:
 
     The worker setup ensures better performance and reliability for your automation tasks.
 
+    ## Update Log
+
+    ### 2025-03-17
+    - Fixed N8N_ENCRYPTION_KEY mismatch between n8n main instance and worker
+    - Ensured worker uses the same encryption key as main instance for improved system stability
+    - Added ability to manually set `N8N_ENCRYPTION_KEY` for both main instance and workers
+
+    ⚠️ Important: If you're using a previous version of this template, please update to this version to avoid potential encryption key synchronization issues.
+
     Note: This template enables two critical environment variables to prevent future compatibility issues:
 
     - `N8N_RUNNERS_ENABLED=true`: Running n8n without task runners is deprecated. Task runners will be turned on by default in a future version. This setting ensures compatibility with the upcoming changes.
@@ -142,7 +151,7 @@ spec:
               default_text_search_config = 'pg_catalog.english'
             permission: null
             envsubst: null
-    - name: n8n
+    - name: n8n-main
       icon: https://i.imgur.com/KUcP61Z.png
       template: PREBUILT_V2
       spec:
@@ -155,6 +164,11 @@ spec:
         volumes:
           - id: data
             dir: /root/.n8n
+        instructions:
+          - type: PASSWORD
+            title: N8N ENCRYPTION KEY
+            content: ${N8N_ENCRYPTION_KEY}
+            category: Credentials
         dependencies:
           - postgresql
           - Redis
@@ -281,7 +295,7 @@ spec:
           - id: data
             dir: /root/.n8n
         dependencies:
-          - n8n
+          - n8n-main
         env:
           DB_POSTGRESDB_DATABASE:
             default: ${POSTGRES_DB}
@@ -363,6 +377,15 @@ localization:
 
       工作程序設置確保你的自動化任務具有更好的性能和可靠性。
 
+      ## 更新日誌
+
+      ### 2025-03-17
+      - 修復了 n8n 主實例和工作程序之間的 N8N_ENCRYPTION_KEY 不匹配問題
+      - 確保工作程序使用與主實例相同的加密密鑰，提高系統穩定性
+      - 添加了手動設置 `N8N_ENCRYPTION_KEY` 的能力，以確保主實例和工作程序的加密密鑰同步
+
+      ⚠️ 重要：如果您正在使用此模板的舊版本，請更新到此版本以避免可能的加密密鑰同步問題。
+
       注意：此模板啟用了兩個重要的環境變數以防止未來的相容性問題：
 
       - `N8N_RUNNERS_ENABLED=true`：不使用任務執行器運行n8n的方式已被棄用。未來版本將預設開啟任務執行器。此設定確保與即將到來的變更相容。
@@ -401,6 +424,15 @@ localization:
 
       ワーカーセットアップにより、自動化タスクのパフォーマンスと信頼性が向上します。
 
+      ## アップデート履歴
+
+      ### 2025-03-17
+      - n8nメインインスタンスとワーカー間のN8N_ENCRYPTION_KEYの不一致を修正
+      - システムの安定性向上のため、ワーカーがメインインスタンスと同じ暗号化キーを使用するように確保
+      - 手動設置 `N8N_ENCRYPTION_KEY` 的能力を追加し、主インスタンスとワーカーの暗号化キーを確保
+
+      ⚠️ 重要：このテンプレートの以前のバージョンをご使用の場合は、暗号化キーの同期の問題を避けるため、このバージョンへの更新をお願いします。
+
       注：このテンプレートは、将来の互換性の問題を防ぐために、二つの重要な環境変数を有効化しています：
 
       - `N8N_RUNNERS_ENABLED=true`：タスクランナーなしでのn8nの実行は非推奨となっています。将来のバージョンではタスクランナーがデフォルトで有効になります。この設定は、今後の変更との互換性を確保します。
@@ -438,6 +470,15 @@ localization:
       - 高效处理后台作业
 
       工作进程设置确保你的自动化任务具有更好的性能和可靠性。
+
+      ## 更新日志
+
+      ### 2025-03-17
+      - 修复了 n8n 主实例和工作进程之间的 N8N_ENCRYPTION_KEY 不匹配问题
+      - 确保工作进程使用与主实例相同的加密密钥，提高系统稳定性
+      - 添加了手動設置 `N8N_ENCRYPTION_KEY` 的能力，以確保主實例和工作程序的加密密鑰同步
+
+      ⚠️ 重要：如果您正在使用此模板的旧版本，请更新到此版本以避免可能的加密密钥同步问题。
 
       注意：此模板启用了两个重要的环境变量以防止未来的兼容性问题：
 
