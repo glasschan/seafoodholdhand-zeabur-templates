@@ -212,7 +212,7 @@ spec:
             expose: false
           N8N_ENCRYPTION_KEY_WORKER:
             default: ${N8N_ENCRYPTION_KEY}
-            expose: false
+            expose: true
         configs: []
     - name: Redis
       icon: https://raw.githubusercontent.com/zeabur/service-icons/main/marketplace/redis.svg
