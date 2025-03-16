@@ -2,7 +2,7 @@
 
 這是一個為 nocode 用戶設計的 n8n worker 模板，專為 Zeabur 平台部署而創建。
 
-[![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/6LRV95?referralCode=glasschan)
+[![Deploy on Zeabur](https://seafoodholdhand.com/recommends/zeabur-n8n-w-worker-template/)
 
 ## 模板連結
 [Zeabur n8n Worker Template](https://seafoodholdhand.com/recommends/zeabur-n8n-w-worker-template/)
