@@ -155,6 +155,11 @@ spec:
         volumes:
           - id: data
             dir: /root/.n8n
+        instructions:
+          - type: PASSWORD
+            title: N8N ENCRYPTION KEY
+            content: ${N8N_ENCRYPTION_KEY}
+            category: Credentials
         dependencies:
           - postgresql
           - Redis
