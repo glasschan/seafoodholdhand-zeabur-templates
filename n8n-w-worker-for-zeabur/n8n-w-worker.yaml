@@ -155,11 +155,6 @@ spec:
         volumes:
           - id: data
             dir: /root/.n8n
-        instructions:
-          - type: PASSWORD
-            title: N8N ENCRYPTION KEY
-            content: ${N8N_ENCRYPTION_KEY}
-            category: Credentials
         dependencies:
           - postgresql
           - Redis
@@ -187,7 +182,7 @@ spec:
             expose: false
           N8N_ENCRYPTION_KEY:
             default: ${PASSWORD}
-            expose: true
+            expose: false
           N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS:
             default: "true"
             expose: false
@@ -214,6 +209,9 @@ spec:
             expose: false
           OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS:
             default: "true"
+            expose: false
+          N8N_ENCRYPTION_KEY_WORKER:
+            default: ${N8N_ENCRYPTION_KEY}
             expose: false
         configs: []
     - name: Redis
@@ -307,7 +305,7 @@ spec:
             default: queue
             expose: false
           N8N_ENCRYPTION_KEY:
-            default: ${N8N_ENCRYPTION_KEY}
+            default: ${N8N_ENCRYPTION_KEY_WORKER}
             expose: false
           N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS:
             default: "true"
