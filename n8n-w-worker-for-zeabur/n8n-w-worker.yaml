@@ -1,9 +1,9 @@
 apiVersion: zeabur.com/v1
 kind: Template
 metadata:
-  name: N8N with Worker
+  name: N8N v2 with Worker & Task Runners
 spec:
-  description: A powerful workflow automation platform with worker support
+  description: N8N v2 workflow automation with worker and external task runners for secure code execution
   icon: https://i.imgur.com/KUcP61Z.png
   coverImage: https://i.imgur.com/Hm4GdsP.png
   variables:
@@ -11,30 +11,59 @@ spec:
       type: DOMAIN
       name: Domain
       description: What is the domain you want for your N8N instance?
+    - key: TASK_RUNNERS_AUTH_TOKEN
+      type: PASSWORD
+      name: Task Runners Auth Token
+      description: Shared secret for task runner authentication (auto-generated if empty)
   tags:
     - Automation
     - Workflow
+    - N8N v2
+    - Task Runners
+    - Code Execution
   readme: |-
-    # N8N with Worker 1-Click Template (create by SEAFOODHOLDHAND)
+    # N8N v2 with Worker & Task Runners (create by SEAFOODHOLDHAND)
 
     [![N8N with Worker](https://i.imgur.com/gi4FDrn.png)](https://www.youtube.com/@seafoodholdhand)
 
-    N8N is a powerful workflow automation platform that helps you connect different services and automate tasks. This template includes:
+    **N8N v2** is a powerful workflow automation platform that helps you connect different services and automate tasks. This template includes:
 
-    - N8N main instance for workflow management (latest version)
-    - N8N worker for processing background tasks
-    - PostgreSQL database for data storage
-    - Redis for queue management
+    - **N8N v2 main instance** for workflow management (latest version)
+    - **N8N worker** for processing background tasks
+    - **External Task Runners** for secure Code node execution (production-ready setup)
+    - **PostgreSQL** database for data storage
+    - **Redis** for queue management
 
-    With N8N, you can:
-    - Create automated workflows
-    - Connect to hundreds of services
-    - Process data and automate tasks
-    - Handle background jobs efficiently
+    ## Why External Task Runners?
 
-    The worker setup ensures better performance and reliability for your automation tasks.
+    This template uses **external task runners** - N8N's recommended production setup for executing code in Code nodes:
+
+    - **🔒 Enhanced Security**: Code runs in isolated containers, separate from your main N8N instance
+    - **⚡ Better Performance**: Task runners can scale independently based on workload
+    - **🛡️ Sandboxed Execution**: JavaScript and Python code execute in controlled environments
+    - **🔄 Auto-Shutdown**: Idle runners automatically shut down after 15 seconds to save resources
+    - **📊 Production Ready**: Follows N8N's best practices for production deployments
+
+    With N8N v2, you can:
+    - Create automated workflows with the visual editor
+    - Connect to hundreds of services and APIs
+    - Execute custom JavaScript and Python code securely in Code nodes
+    - Process data and automate tasks with reliable background workers
+    - Handle webhook-triggered workflows efficiently
+
+    The worker + task runner setup ensures your automation tasks are processed reliably and securely.
 
     ## Update Log
+
+    ### 2025-12-28
+    - **IMPORTANT**: Template updated for N8N v2 compatibility
+    - Upgraded to external task runners (production-recommended setup)
+    - Added separate `task-runners` service as a sidecar to n8n-worker
+    - Configured `N8N_RUNNERS_MODE=external` for better security and performance
+    - Task runners now execute Code node JavaScript/Python code in isolated containers
+    - Added `TASK_RUNNERS_AUTH_TOKEN` variable for secure broker-runner authentication
+
+    This update ensures your N8N v2 workflows run securely with external task runners, following N8N's best practices for production deployments.
 
     ### 2025-03-17
     - Fixed N8N_ENCRYPTION_KEY mismatch between n8n main instance and worker
@@ -45,7 +74,9 @@ spec:
 
     Note: This template enables two critical environment variables to prevent future compatibility issues:
 
-    - `N8N_RUNNERS_ENABLED=true`: Running n8n without task runners is deprecated. Task runners will be turned on by default in a future version. This setting ensures compatibility with the upcoming changes.
+    - `N8N_RUNNERS_ENABLED=true`: Enables task runners for executing Code node code securely. Task runners are required for JavaScript and Python code execution in Code nodes.
+
+    - `N8N_RUNNERS_MODE=external`: Uses external task runner containers (recommended for production) instead of internal child processes.
 
     - `OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS=true`: Running manual executions in the main instance in scaling mode is deprecated. Manual executions will be routed to workers in a future version. This setting prepares your deployment for this change.
 
@@ -161,6 +192,9 @@ spec:
           - id: web
             port: 5678
             type: HTTP
+          - id: task-broker
+            port: 5679
+            type: TCP
         volumes:
           - id: data
             dir: /root/.n8n
@@ -223,6 +257,15 @@ spec:
             expose: false
           OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS:
             default: "true"
+            expose: false
+          N8N_RUNNERS_MODE:
+            default: external
+            expose: false
+          N8N_RUNNERS_BROKER_LISTEN_ADDRESS:
+            default: 0.0.0.0
+            expose: false
+          N8N_RUNNERS_AUTH_TOKEN:
+            default: ${TASK_RUNNERS_AUTH_TOKEN}
             expose: false
           N8N_ENCRYPTION_KEY_WORKER:
             default: ${N8N_ENCRYPTION_KEY}
@@ -291,6 +334,10 @@ spec:
           args:
             - -c
             - n8n worker
+        ports:
+          - id: task-broker
+            port: 5679
+            type: TCP
         volumes:
           - id: data
             dir: /root/.n8n
@@ -348,36 +395,90 @@ spec:
           OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS:
             default: "true"
             expose: false
+          N8N_RUNNERS_MODE:
+            default: external
+            expose: false
+          N8N_RUNNERS_BROKER_LISTEN_ADDRESS:
+            default: 0.0.0.0
+            expose: false
+          N8N_RUNNERS_AUTH_TOKEN:
+            default: ${TASK_RUNNERS_AUTH_TOKEN}
+            expose: false
+        configs: []
+    - name: task-runners
+      icon: https://i.imgur.com/KUcP61Z.png
+      template: PREBUILT_V2
+      spec:
+        source:
+          image: docker.io/n8nio/runners:latest
+        dependencies:
+          - n8n-worker
+        env:
+          N8N_RUNNERS_AUTH_TOKEN:
+            default: ${TASK_RUNNERS_AUTH_TOKEN}
+            expose: false
+          N8N_RUNNERS_TASK_BROKER_URI:
+            default: http://${N8N_WORKER_HOST}:5679
+            expose: false
+          N8N_RUNNERS_AUTO_SHUTDOWN_TIMEOUT:
+            default: "15"
+            expose: false
         configs: []
 localization:
   zh-TW:
-    description: N8N 是一個強大的工作流程自動化平台，具有工作程序支援功能。
+    description: N8N v2 工作流程自動化平台，配備工作程序和外部任務執行器以實現安全代碼執行
     variables:
       - key: PUBLIC_DOMAIN
         type: DOMAIN
         name: 網域
         description: 你想將 N8N 綁在哪個網域上？
+      - key: TASK_RUNNERS_AUTH_TOKEN
+        type: PASSWORD
+        name: 任務執行器認證令牌
+        description: 任務執行器認證的共享密鑰（若為空則自動生成）
     readme: |-
-      # N8N with Worker 1-Click Template (create by SEAFOODHOLDHAND)
+      # N8N v2 搭配工作程序與任務執行器 (create by SEAFOODHOLDHAND)
 
       [![N8N with Worker](https://i.imgur.com/gi4FDrn.png)](https://www.youtube.com/@seafoodholdhand)
 
-      N8N 是一個強大的工作流程自動化平台，可以幫助你連接不同的服務並自動化任務。此模板包含：
+      **N8N v2** 是一個強大的工作流程自動化平台，可以幫助你連接不同的服務並自動化任務。此模板包含：
 
-      - N8N 主實例用於工作流程管理（最新版本）
-      - N8N 工作程序用於處理背景任務
-      - PostgreSQL 資料庫用於數據存儲
-      - Redis 用於隊列管理
+      - **N8N v2 主實例**用於工作流程管理（最新版本）
+      - **N8N 工作程序**用於處理背景任務
+      - **外部任務執行器**用於安全執行 Code 節點（生產環境就緒設置）
+      - **PostgreSQL** 資料庫用於數據存儲
+      - **Redis** 用於隊列管理
 
-      使用 N8N，你可以：
-      - 創建自動化工作流程
-      - 連接數百種服務
-      - 處理數據並自動化任務
-      - 高效處理背景作業
+      ## 為什麼使用外部任務執行器？
 
-      工作程序設置確保你的自動化任務具有更好的性能和可靠性。
+      此模板使用**外部任務執行器** - N8N 推薦的生產環境設置，用於在 Code 節點中執行代碼：
+
+      - **🔒 增強安全性**：代碼在隔離容器中運行，與主 N8N 實例分開
+      - **⚡ 更佳性能**：任務執行器可以根據工作負載獨立擴展
+      - **🛡️ 沙盒執行**：JavaScript 和 Python 代碼在受控環境中執行
+      - **🔄 自動關閉**：閒置的執行器會在 15 秒後自動關閉以節省資源
+      - **📊 生產就緒**：遵循 N8N 生產部署的最佳實踐
+
+      使用 N8N v2，你可以：
+      - 使用可視化編輯器創建自動化工作流程
+      - 連接數百種服務和 API
+      - 在 Code 節點中安全地執行自定義 JavaScript 和 Python 代碼
+      - 使用可靠的背景工作程序處理數據並自動化任務
+      - 高效處理 Webhook 觸發的工作流程
+
+      工作程序 + 任務執行器設置確保您的自動化任務得到可靠且安全的處理。
 
       ## 更新日誌
+
+      ### 2025-12-28
+      - **重要**：模板已更新以支援 N8N v2
+      - 升級至外部任務執行器（生產環境推薦設置）
+      - 添加了獨立的 `task-runners` 服務作為 n8n-worker 的 sidecar 容器
+      - 配置了 `N8N_RUNNERS_MODE=external` 以提供更好的安全性和性能
+      - 任務執行器現在在隔離容器中執行 Code 節點的 JavaScript/Python 代碼
+      - 添加了 `TASK_RUNNERS_AUTH_TOKEN` 變數用於安全的中介-執行器認證
+
+      此更新確保您的 N8N v2 工作流程使用外部任務執行器安全運行，遵循 N8N 生產部署的最佳實踐。
 
       ### 2025-03-17
       - 修復了 n8n 主實例和工作程序之間的 N8N_ENCRYPTION_KEY 不匹配問題
@@ -386,9 +487,11 @@ localization:
 
       ⚠️ 重要：如果您正在使用此模板的舊版本，請更新到此版本以避免可能的加密密鑰同步問題。
 
-      注意：此模板啟用了兩個重要的環境變數以防止未來的相容性問題：
+      注意：此模板啟用了關鍵的環境變數以防止未來的相容性問題：
 
-      - `N8N_RUNNERS_ENABLED=true`：不使用任務執行器運行n8n的方式已被棄用。未來版本將預設開啟任務執行器。此設定確保與即將到來的變更相容。
+      - `N8N_RUNNERS_ENABLED=true`：啟用任務執行器以安全執行 Code 節點代碼。Code 節點中的 JavaScript 和 Python 代碼執行需要任務執行器。
+
+      - `N8N_RUNNERS_MODE=external`：使用外部任務執行器容器（生產環境推薦）而非內部子進程。
 
       - `OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS=true`：在擴展模式下於主實例執行手動工作流程的方式已被棄用。未來版本中，手動執行將轉由工作程序處理。此設定為此變更做好準備。
 
@@ -398,33 +501,59 @@ localization:
       [https://github.com/glasschan/seafoodholdhand-zeabur-templates](https://github.com/glasschan/seafoodholdhand-zeabur-templates)
 
   ja-JP:
-    description: N8N はワーカーサポートを備えた強力なワークフロー自動化プラットフォームです。
+    description: N8N v2 ワークフロー自動化プラットフォーム。ワーカーと外部タスクランナーによる安全なコード実行を搭載
     variables:
       - key: PUBLIC_DOMAIN
         type: DOMAIN
         name: ドメイン
         description: N8N インスタンスに使用したいドメインは何ですか？
+      - key: TASK_RUNNERS_AUTH_TOKEN
+        type: PASSWORD
+        name: タスクランナー認証トークン
+        description: タスクランナー認証の共有シークレット（空の場合は自動生成）
     readme: |-
-      # N8N with Worker 1-Click Template (create by SEAFOODHOLDHAND)
+      # N8N v2 with Worker & Task Runners (create by SEAFOODHOLDHAND)
 
       [![N8N with Worker](https://i.imgur.com/gi4FDrn.png)](https://www.youtube.com/@seafoodholdhand)
 
-      N8Nは、異なるサービスを接続してタスクを自動化するのに役立つ強力なワークフロー自動化プラットフォームです。このテンプレートには以下が含まれます：
+      **N8N v2**は、異なるサービスを接続してタスクを自動化するのに役立つ強力なワークフロー自動化プラットフォームです。このテンプレートには以下が含まれます：
 
-      - ワークフロー管理用のN8Nメインインスタンス（最新バージョン）
-      - バックグラウンドタスク処理用のN8Nワーカー
-      - データストレージ用のPostgreSQLデータベース
-      - キュー管理用のRedis
+      - **N8N v2 メインインスタンス**（ワークフロー管理用、最新バージョン）
+      - **N8N ワーカー**（バックグラウンドタスク処理用）
+      - **外部タスクランナー**（Codeノードの安全な実行用、本番環境対応設定）
+      - **PostgreSQL**（データストレージ用）
+      - **Redis**（キュー管理用）
 
-      N8Nを使用することで、以下のことが可能です：
-      - 自動化されたワークフローの作成
-      - 数百のサービスへの接続
-      - データ処理とタスクの自動化
-      - バックグラウンドジョブの効率的な処理
+      ## 外部タスクランナーを使用する理由
 
-      ワーカーセットアップにより、自動化タスクのパフォーマンスと信頼性が向上します。
+      このテンプレートでは**外部タスクランナー**を使用しています - これはCodeノードでコードを実行するためのN8N推奨の本番環境設定です：
+
+      - **🔒 セキュリティ強化**：コードはメインのN8Nインスタンスから分離されたコンテナで実行されます
+      - **⚡ パフォーマンス向上**：タスクランナーはワークロードに応じて独立してスケールできます
+      - **🛡️ サンドボックス実行**：JavaScriptとPythonコードは制御された環境で実行されます
+      - **🔄 自動シャットダウン**：アイドル状態のランナーは15秒後に自動的にシャットダウンしてリソースを節約
+      - **📊 本番環境対応**：N8Nの本番デプロイのベストプラクティスに従っています
+
+      N8N v2を使用すると、以下のことが可能です：
+      - ビジュアルエディタで自動化されたワークフローを作成
+      - 数百のサービスやAPIに接続
+      - CodeノードでカスタムJavaScriptとPythonコードを安全に実行
+      - 信頼性の高いバックグラウンドワーカーでデータを処理してタスクを自動化
+      - Webhookトリガーのワークフローを効率的に処理
+
+      ワーカーとタスクランナーのセットアップにより、自動化タスクが確実かつ安全に処理されます。
 
       ## アップデート履歴
+
+      ### 2025-12-28
+      - **重要**：テンプレートをN8N v2対応に更新
+      - 外部タスクランナーにアップグレード（本番環境推奨設定）
+      - n8n-workerのサイドカーとして独立した `task-runners` サービスを追加
+      - より良いセキュリティとパフォーマンスのために `N8N_RUNNERS_MODE=external` を設定
+      - タスクランナーは、CodeノードのJavaScript/Pythonコードを分離されたコンテナで実行するようになりました
+      - 安全なブローカー-ランナー認証のために `TASK_RUNNERS_AUTH_TOKEN` 変数を追加
+
+      このアップデートにより、N8N v2ワークフローが外部タスクランナーで安全に実行され、N8Nの本番デプロイのベストプラクティスに従うようになります。
 
       ### 2025-03-17
       - n8nメインインスタンスとワーカー間のN8N_ENCRYPTION_KEYの不一致を修正
@@ -433,9 +562,11 @@ localization:
 
       ⚠️ 重要：このテンプレートの以前のバージョンをご使用の場合は、暗号化キーの同期の問題を避けるため、このバージョンへの更新をお願いします。
 
-      注：このテンプレートは、将来の互換性の問題を防ぐために、二つの重要な環境変数を有効化しています：
+      注：このテンプレートは、将来の互換性の問題を防ぐために、重要な環境変数を有効化しています：
 
-      - `N8N_RUNNERS_ENABLED=true`：タスクランナーなしでのn8nの実行は非推奨となっています。将来のバージョンではタスクランナーがデフォルトで有効になります。この設定は、今後の変更との互換性を確保します。
+      - `N8N_RUNNERS_ENABLED=true`：Codeノードのコードを安全に実行するためにタスクランナーを有効にします。CodeノードでのJavaScriptおよびPythonコードの実行にはタスクランナーが必要です。
+
+      - `N8N_RUNNERS_MODE=external`：内部子プロセスの代わりに外部タスクランナーコンテナを使用します（本番環境推奨）。
 
       - `OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS=true`：スケーリングモードでのメインインスタンスでの手動実行は非推奨となっています。将来のバージョンでは、手動実行はワーカーにルーティングされます。この設定は、この変更に備えるものです。
 
@@ -445,33 +576,59 @@ localization:
       [https://github.com/glasschan/seafoodholdhand-zeabur-templates](https://github.com/glasschan/seafoodholdhand-zeabur-templates)
 
   zh-CN:
-    description: N8N 是一个强大的工作流程自动化平台，具有工作进程支持功能。
+    description: N8N v2 工作流自动化平台，配备工作进程和外部任务运行器以实现安全代码执行
     variables:
       - key: PUBLIC_DOMAIN
         type: DOMAIN
         name: 域名
         description: 你想将 N8N 绑定在哪个域名上？
+      - key: TASK_RUNNERS_AUTH_TOKEN
+        type: PASSWORD
+        name: 任务运行器认证令牌
+        description: 任务运行器认证的共享密钥（如果为空则自动生成）
     readme: |-
-      # N8N with Worker 1-Click Template (create by SEAFOODHOLDHAND)
+      # N8N v2 搭配工作进程与任务运行器 (create by SEAFOODHOLDHAND)
 
       [![N8N with Worker](https://i.imgur.com/gi4FDrn.png)](https://www.youtube.com/@seafoodholdhand)
 
-      N8N 是一个强大的工作流程自动化平台，可以帮助你连接不同的服务并自动化任务。此模板包含：
+      **N8N v2** 是一个强大的工作流程自动化平台，可以帮助你连接不同的服务并自动化任务。此模板包含：
 
-      - N8N 主实例用于工作流程管理（最新版本）
-      - N8N 工作进程用于处理后台任务
-      - PostgreSQL 数据库用于数据存储
-      - Redis 用于队列管理
+      - **N8N v2 主实例**用于工作流程管理（最新版本）
+      - **N8N 工作进程**用于处理后台任务
+      - **外部任务运行器**用于安全执行 Code 节点（生产环境就绪设置）
+      - **PostgreSQL** 数据库用于数据存储
+      - **Redis** 用于队列管理
 
-      使用 N8N，你可以：
-      - 创建自动化工作流程
-      - 连接数百种服务
-      - 处理数据并自动化任务
-      - 高效处理后台作业
+      ## 为什么使用外部任务运行器？
 
-      工作进程设置确保你的自动化任务具有更好的性能和可靠性。
+      此模板使用**外部任务运行器** - N8N 推荐的生产环境设置，用于在 Code 节点中执行代码：
+
+      - **🔒 增强安全性**：代码在隔离容器中运行，与主 N8N 实例分开
+      - **⚡ 更佳性能**：任务运行器可以根据工作负载独立扩展
+      - **🛡️ 沙盒执行**：JavaScript 和 Python 代码在受控环境中执行
+      - **🔄 自动关闭**：闲置的运行器会在 15 秒后自动关闭以节省资源
+      - **📊 生产就绪**：遵循 N8N 生产部署的最佳实践
+
+      使用 N8N v2，你可以：
+      - 使用可视化编辑器创建自动化工作流程
+      - 连接数百种服务和 API
+      - 在 Code 节点中安全地执行自定义 JavaScript 和 Python 代码
+      - 使用可靠的后台工作进程处理数据并自动化任务
+      - 高效处理 Webhook 触发的工作流程
+
+      工作进程 + 任务运行器设置确保您的自动化任务得到可靠且安全的处理。
 
       ## 更新日志
+
+      ### 2025-12-28
+      - **重要**：模板已更新以支持 N8N v2
+      - 升级到外部任务运行器（生产环境推荐设置）
+      - 添加了独立的 `task-runners` 服务作为 n8n-worker 的 sidecar 容器
+      - 配置了 `N8N_RUNNERS_MODE=external` 以提供更好的安全性和性能
+      - 任务运行器现在在隔离容器中执行 Code 节点的 JavaScript/Python 代码
+      - 添加了 `TASK_RUNNERS_AUTH_TOKEN` 变量用于安全的代理-运行器认证
+
+      此更新确保您的 N8N v2 工作流程使用外部任务运行器安全运行，遵循 N8N 生产部署的最佳实践。
 
       ### 2025-03-17
       - 修复了 n8n 主实例和工作进程之间的 N8N_ENCRYPTION_KEY 不匹配问题
@@ -480,9 +637,11 @@ localization:
 
       ⚠️ 重要：如果您正在使用此模板的旧版本，请更新到此版本以避免可能的加密密钥同步问题。
 
-      注意：此模板启用了两个重要的环境变量以防止未来的兼容性问题：
+      注意：此模板启用了关键的环境变量以防止未来的兼容性问题：
 
-      - `N8N_RUNNERS_ENABLED=true`：不使用任务执行器运行n8n的方式已被弃用。未来版本将默认开启任务执行器。此设置确保与即将到来的变更兼容。
+      - `N8N_RUNNERS_ENABLED=true`：启用任务运行器以安全执行 Code 节点代码。Code 节点中的 JavaScript 和 Python 代码执行需要任务运行器。
+
+      - `N8N_RUNNERS_MODE=external`：使用外部任务运行器容器（生产环境推荐）而非内部子进程。
 
       - `OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS=true`：在扩展模式下于主实例执行手动工作流程的方式已被弃用。未来版本中，手动执行将转由工作进程处理。此设置为此变更做好准备。
 
