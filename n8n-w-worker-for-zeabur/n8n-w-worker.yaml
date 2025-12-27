@@ -192,7 +192,7 @@ spec:
           - id: web
             port: 5678
             type: HTTP
-          - id: task-broker
+          - id: taskbroker
             port: 5679
             type: TCP
         volumes:
@@ -335,7 +335,7 @@ spec:
             - -c
             - n8n worker
         ports:
-          - id: task-broker
+          - id: taskbroker
             port: 5679
             type: TCP
         volumes:
