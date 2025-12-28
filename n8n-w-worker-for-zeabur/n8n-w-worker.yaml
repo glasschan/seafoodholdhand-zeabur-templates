@@ -183,7 +183,7 @@ spec:
       template: PREBUILT_V2
       spec:
         source:
-          image: docker.io/n8nio/n8n:latest
+          image: n8nio/n8n:stable
         ports:
           - id: web
             port: 5678
@@ -413,7 +413,7 @@ spec:
       template: PREBUILT_V2
       spec:
         source:
-          image: docker.io/n8nio/runners:latest
+          image: n8nio/runners:stable
         dependencies:
           - n8n-worker
         env:
