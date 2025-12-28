@@ -1,0 +1,369 @@
+{
+    "$id": "https://schema.zeabur.app/template.json",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Zeabur Template Resource",
+    "description": "The Zeabur Template resource is a resource that defines a template that can be used to create a new Zeabur resource like GIT or PREBUILT service. It should be formed in YAML.",
+    "type": "object",
+    "properties": {
+        "apiVersion": {
+            "title": "Resource version",
+            "description": "The version of the resource. It should be `zeabur.com/v1`.",
+            "type": "string",
+            "enum": [
+                "zeabur.com/v1"
+            ]
+        },
+        "kind": {
+            "title": "Resource kind",
+            "description": "The kind of the resource. It should be `Template`.",
+            "type": "string",
+            "enum": [
+                "Template"
+            ]
+        },
+        "metadata": {
+            "title": "Resource metadata",
+            "description": "The metadata of the resource.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Resource name",
+                    "description": "The name of the resource. It is usually as same as the template name.",
+                    "examples": [
+                        "Lobe Chat",
+                        "PostgreSQL"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "additionalProperties": false
+        },
+        "spec": {
+            "title": "Template specification",
+            "description": "The specification of the template.",
+            "type": "object",
+            "properties": {
+                "description": {
+                    "title": "Template description",
+                    "description": "The description of the template.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "coverImage": {
+                    "title": "Template cover image",
+                    "description": "The cover image of the template. It should be a URL link to the image. It can be SVG, PNG, WebP…",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/Picture"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "icon": {
+                    "title": "Template icon",
+                    "description": "The icon of the template. It should be a URL link to the image. It can be SVG, PNG, WebP…",
+                    "oneOf": [
+                        {
+                            "$ref": "#/definitions/Picture"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "variables": {
+                    "title": "Template fillable variables",
+                    "description": "The variables that users need to fill in to create a new template.",
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "key": {
+                                "title": "Variable key",
+                                "description": "The key of the variable.",
+                                "examples": [
+                                    "SITE_NAME",
+                                    "SITE_DOMAIN"
+                                ],
+                                "type": "string"
+                            },
+                            "type": {
+                                "title": "Variable type",
+                                "description": "The type of the variable. String for the normal text-based variables, such as passwords or site names. Domain is the domain name that Zeabur can instruct users to generate a zeabur.app domain.",
+                                "type": "string",
+                                "enum": [
+                                    "STRING",
+                                    "DOMAIN",
+                                    "PASSWORD"
+                                ]
+                            },
+                            "name": {
+                                "title": "Variable descriptive name",
+                                "description": "The name of the variable that will be showed to the user.",
+                                "examples": [
+                                    "Site Name",
+                                    "Site domain"
+                                ],
+                                "type": "string"
+                            },
+                            "description": {
+                                "title": "Variable description",
+                                "description": "The description of the variable that will be showed to the user.",
+                                "examples": [
+                                    "The name that will be showed as the title of your website"
+                                ],
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "key",
+                            "type",
+                            "name",
+                            "description"
+                        ],
+                        "additionalProperties": false
+                    }
+                },
+                "tags": {
+                    "title": "Template tags",
+                    "description": "The tag of the template. It is useful for users to find the suitable template.",
+                    "examples": [
+                        [
+                            "Website",
+                            "Tool"
+                        ],
+                        [
+                            "Database"
+                        ]
+                    ],
+                    "type": "array",
+                    "items": {
+                        "title": "Tag",
+                        "type": "string"
+                    }
+                },
+                "readme": {
+                    "title": "Template README",
+                    "description": "The README content of the Template. It will be showed in the description section in Template. It should be in Markdown.",
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "examples": [
+                        "# PostgreSQL\nPostgreSQL is a powerful, open source object-relational database system with over 35 years of active development that has earned it a strong reputation for reliability, feature robustness, and performance."
+                    ]
+                },
+                "resourceUsage": {
+                    "title": "Resource usage",
+                    "description": "The expected resource usage of this template. It is only for displaying and does not affect the actual resource usage.",
+                    "type": "object",
+                    "properties": {
+                        "cpu": {
+                            "title": "CPU",
+                            "description": "The expected average vCPU usage of this template.",
+                            "type": "number",
+                            "examples": [
+                                0.1,
+                                0.3,
+                                1
+                            ]
+                        },
+                        "memory": {
+                            "title": "Memory",
+                            "description": "The expected average memory usage (in MiB) of this template.",
+                            "type": "number",
+                            "examples": [
+                                1024,
+                                2048,
+                                4096
+                            ]
+                        }
+                    }
+                },
+                "services": {
+                    "title": "Template services",
+                    "description": "The services that will be created when the resource is created.",
+                    "type": "array",
+                    "items": {
+                        "title": "Template service definition",
+                        "description": "The service that will be created when the resource is created.",
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "title": "Service name",
+                                "description": "The name of the service.",
+                                "examples": [
+                                    "Lobe Chat",
+                                    "PostgreSQL"
+                                ],
+                                "type": "string",
+                                "pattern": "^[a-zA-Z][ -~]*$"
+                            },
+                            "icon": {
+                                "title": "Service icon",
+                                "description": "The icon of the service. It should be a URL link to the image. It can be SVG, PNG, WebP…",
+                                "oneOf": [
+                                    {
+                                        "$ref": "#/definitions/Picture"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            },
+                            "dependencies": {
+                                "title": "Service dependencies",
+                                "description": "The dependencies of the service. It should be the name of the services that this service depends on.",
+                                "type": [
+                                    "array",
+                                    "null"
+                                ],
+                                "items": {
+                                    "title": "Dependency",
+                                    "description": "The name of the service that this service depends on.",
+                                    "type": "string"
+                                }
+                            },
+                            "template": {
+                                "title": "Service type",
+                                "description": "The type of the service. It can be `GIT`, `PREBUILT` and `PREBUILT_V2`. `PREBUILT` is the alias of `PREBUILT_V2`.",
+                                "type": "string",
+                                "enum": [
+                                    "GIT",
+                                    "PREBUILT",
+                                    "PREBUILT_V2"
+                                ]
+                            },
+                            "spec": {
+                                "$ref": "https://schema.zeabur.app/prebuilt.json"
+                            },
+                            "domainKey": {
+                                "title": "Domain key",
+                                "description": "The variable with the domain name that is used for binding to this service. If this service contains only one domain key, it will be automatically bound to the domain. If there are multiple domain keys, you should specify it with array.",
+                                "examples": [
+                                    "SITE_DOMAIN",
+                                    [
+                                        {
+                                            "port": "web",
+                                            "variable": "SITE_DOMAIN"
+                                        },
+                                        {
+                                            "port": "console",
+                                            "variable": "CONSOLE_DOMAIN"
+                                        }
+                                    ]
+                                ],
+                                "oneOf": [
+                                    {
+                                        "type": "null"
+                                    },
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "array",
+                                        "items": {
+                                            "title": "Domain key binding",
+                                            "description": "The map-binding of the domain key and the port.",
+                                            "type": "object",
+                                            "properties": {
+                                                "port": {
+                                                    "type": "string",
+                                                    "description": "The port name that the domain will be bound to."
+                                                },
+                                                "variable": {
+                                                    "type": "string",
+                                                    "description": "The variable containing the domain that will be bound to the port."
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        "required": [
+                            "name",
+                            "template",
+                            "spec"
+                        ]
+                    }
+                }
+            },
+            "required": [
+                "services"
+            ]
+        },
+        "localization": {
+            "title": "Resource localization",
+            "description": "The localization of the resource.",
+            "type": "object",
+            "propertyNames": {
+                "title": "Locale key",
+                "description": "The key of the locale that [Zeabur supports](https://github.com/zeabur/zeabur/tree/main/dashboard/locales).",
+                "type": "string"
+            },
+            "additionalProperties": {
+                "title": "Localizable Template Specification",
+                "description": "The localizable specification of the template.",
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "$ref": "#/properties/spec/properties/description"
+                    },
+                    "coverImage": {
+                        "$ref": "#/properties/spec/properties/coverImage"
+                    },
+                    "readme": {
+                        "$ref": "#/properties/spec/properties/readme"
+                    }
+                }
+            },
+            "examples": [
+                {
+                    "zh-TW": {
+                        "description": "LobeChat 是一個開源的高效能聊天機器人框架。",
+                        "variables": [
+                            {
+                                "key": "SITE_NAME",
+                                "type": "STRING",
+                                "name": "網站名稱",
+                                "description": "這個名稱將會顯示在您的網站標題上。"
+                            },
+                            {
+                                "key": "SITE_DOMAIN",
+                                "type": "DOMAIN",
+                                "name": "網站網域",
+                                "description": "這個網域將會是您的網站的網址。"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    },
+    "definitions": {
+        "Picture": {
+            "title": "The picture URL",
+            "description": "It should be a URL link to the image. It can be SVG, PNG, WebP…",
+            "type": "string",
+            "examples": [
+                "https://www.postgresql.org/media/img/about/press/elephant.png"
+            ],
+            "format": "uri"
+        }
+    },
+    "required": [
+        "apiVersion",
+        "kind",
+        "metadata",
+        "spec"
+    ],
+    "additionalProperties": false
+}

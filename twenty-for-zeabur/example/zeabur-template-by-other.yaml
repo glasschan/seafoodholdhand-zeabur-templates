@@ -1,0 +1,666 @@
+# yaml-language-server: $schema=https://schema.zeabur.app/template.json
+apiVersion: zeabur.com/v1
+kind: Template
+metadata:
+    name: Twenty
+spec:
+    description: A modern Open Source CRM platform that helps you manage contacts, deals, and tasks efficiently.
+    coverImage: https://raw.githubusercontent.com/twentyhq/twenty/refs/heads/main/packages/twenty-website/public/images/readme/github-cover-dark.png
+    icon: https://github.com/twentyhq/twenty/raw/main/packages/twenty-website/public/images/core/logo.svg
+    variables:
+        - key: TWENTY_DOMAIN
+          type: DOMAIN
+          name: Domain
+          description: The domain where your Twenty CRM will be accessible
+    tags:
+        - CRM
+        - Business
+        - Database
+    readme: |-
+        # Twenty CRM
+
+        Twenty is a modern Open Source CRM platform built with React, Node.js, and PostgreSQL. It provides a complete solution for managing contacts, deals, companies, and tasks.
+
+        ## Features
+
+        - **Contact Management**: Track and organize your contacts with detailed information
+        - **Deal Pipeline**: Visual pipeline to manage sales opportunities
+        - **Task Management**: Assign and track tasks across teams
+        - **Activity Timeline**: Complete activity history for each contact and deal
+        - **Custom Fields**: Add custom fields to adapt to your business needs
+        - **Multi-language Support**: Available in multiple languages
+        - **Open Source**: Full access to source code
+
+        ## Deployment
+
+        This template automatically deploys:
+        - Twenty Web Application (React frontend)
+        - Twenty Server (Node.js backend)
+        - Background Worker for task processing
+        - PostgreSQL Database
+        - Redis for caching and session storage
+        - MinIO for S3-compatible object storage
+
+        ## Configuration Notes
+
+        ### Environment Variable Sharing
+
+        The Twenty Worker service requires access to the same configuration as the Twenty server to function properly. Key variables like `PG_DATABASE_URL`, `REDIS_URL`, `APP_SECRET`, and storage settings (`STORAGE_*`) must be exposed and shared between both services.
+
+        ### Configuration Mode
+
+        Twenty supports two configuration approaches:
+
+        - **Database-Driven (Default)**: When `IS_CONFIG_VARIABLES_IN_DB_ENABLED=true`, most settings can be managed through the admin UI and automatically sync between server and worker.
+
+        - **Environment-Only**: Set `IS_CONFIG_VARIABLES_IN_DB_ENABLED=false` to manage all configuration through environment variables. This requires container restarts for changes to take effect, but provides more predictable deployments.
+
+        For self-hosted deployments where you want full control via environment variables, it's recommended to set `IS_CONFIG_VARIABLES_IN_DB_ENABLED=false` on both the Twenty server and Twenty Worker services.
+
+        ## Default Credentials
+
+        After deployment, create your admin account by visiting the application domain.
+
+        ## External Access
+
+        The application will be available on the domain you specified during deployment.
+    resourceUsage:
+        cpu: 1
+        memory: 2048
+    services:
+        - name: PostgreSQL
+          icon: https://cdn.zeabur.com/marketplace/postgresql.svg
+          template: PREBUILT_V2
+          spec:
+            source:
+                image: postgres:18
+                command:
+                    - docker-entrypoint.sh
+                    - -c
+                    - config_file=/etc/postgresql/postgresql.conf
+            ports:
+                - id: database
+                  port: 5432
+                  type: TCP
+            volumes:
+                - id: data
+                  dir: /var/lib/postgresql/18/docker
+            instructions:
+                - title: Connection String
+                  content: postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@${PORT_FORWARDED_HOSTNAME}:${DATABASE_PORT_FORWARDED_PORT}/${POSTGRES_DATABASE}
+                - title: PostgreSQL Connect Command
+                  content: psql "postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@${PORT_FORWARDED_HOSTNAME}:${DATABASE_PORT_FORWARDED_PORT}/${POSTGRES_DATABASE}"
+                - title: PostgreSQL username
+                  content: ${POSTGRES_USERNAME}
+                - title: PostgresSQL password
+                  content: ${POSTGRES_PASSWORD}
+                - title: PostgresSQL database
+                  content: ${POSTGRES_DATABASE}
+                - title: PostgreSQL host
+                  content: ${PORT_FORWARDED_HOSTNAME}
+                - title: PostgreSQL port
+                  content: ${DATABASE_PORT_FORWARDED_PORT}
+            env:
+                PGDATA:
+                    default: /var/lib/postgresql/18/docker/pgdata
+                    expose: false
+                POSTGRES_CONNECTION_STRING:
+                    default: postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}
+                    expose: true
+                POSTGRES_DATABASE:
+                    default: ${POSTGRES_DB}
+                    expose: true
+                POSTGRES_DB:
+                    default: twenty
+                    expose: false
+                POSTGRES_HOST:
+                    default: ${CONTAINER_HOSTNAME}
+                    expose: true
+                POSTGRES_PASSWORD:
+                    default: ${PASSWORD}
+                    expose: true
+                POSTGRES_PORT:
+                    default: ${DATABASE_PORT}
+                    expose: true
+                POSTGRES_URI:
+                    default: ${POSTGRES_CONNECTION_STRING}
+                    expose: true
+                POSTGRES_USER:
+                    default: root
+                    expose: false
+                POSTGRES_USERNAME:
+                    default: ${POSTGRES_USER}
+                    expose: true
+            configs:
+                - path: /etc/postgresql/postgresql.conf
+                  template: |
+                    # https://github.com/postgres/postgres/blob/master/src/backend/utils/misc/postgresql.conf.sample
+                    listen_addresses = '*'
+                    max_connections = 256
+                    shared_buffers = 256MB
+                    dynamic_shared_memory_type = posix
+                    max_wal_size = 1GB
+                    min_wal_size = 80MB
+                    log_timezone = 'UTC'
+                    datestyle = 'iso, mdy'
+                    timezone = 'UTC'
+                    lc_messages = 'en_US.UTF-8'
+                    lc_monetary = 'en_US.UTF-8'
+                    lc_numeric = 'en_US.UTF-8'
+                    lc_time = 'en_US.UTF-8'
+                    default_text_search_config = 'pg_catalog.english'
+                  permission: null
+                  envsubst: null
+            portForwarding:
+                enabled: true
+        - name: Redis
+          icon: https://raw.githubusercontent.com/zeabur/service-icons/main/marketplace/redis.svg
+          template: PREBUILT_V2
+          spec:
+            source:
+                image: redis/redis-stack-server:latest
+            ports:
+                - id: database
+                  port: 6379
+                  type: TCP
+            volumes:
+                - id: data
+                  dir: /data
+            instructions:
+                - title: Command to connect to your Redis
+                  content: redis-cli -h ${PORT_FORWARDED_HOSTNAME} -p ${DATABASE_PORT_FORWARDED_PORT} -a ${REDIS_PASSWORD}
+                - title: Redis Connection String
+                  content: redis://:${REDIS_PASSWORD}@${PORT_FORWARDED_HOSTNAME}:${DATABASE_PORT_FORWARDED_PORT}
+                - title: Redis password
+                  content: ${REDIS_PASSWORD}
+                - title: Redis host
+                  content: ${PORT_FORWARDED_HOSTNAME}
+                - title: Redis port
+                  content: ${DATABASE_PORT_FORWARDED_PORT}
+            env:
+                CONFFILE:
+                    default: /etc/redis-stack.conf
+                    expose: false
+                REDIS_ARGS:
+                    default: --requirepass ${REDIS_PASSWORD}
+                    expose: false
+                REDIS_CONNECTION_STRING:
+                    default: redis://:${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_PORT}
+                    expose: true
+                REDIS_HOST:
+                    default: ${CONTAINER_HOSTNAME}
+                    expose: true
+                REDIS_PASSWORD:
+                    default: ${PASSWORD}
+                    expose: true
+                REDIS_PORT:
+                    default: ${DATABASE_PORT}
+                    expose: true
+                REDIS_URI:
+                    default: ${REDIS_CONNECTION_STRING}
+                    expose: true
+            configs:
+                - path: /etc/redis-stack.conf
+                  template: |
+                    port 6379
+                    daemonize no
+                  permission: null
+                  envsubst: null
+            portForwarding:
+                enabled: true
+        - name: MinIO
+          icon: https://cdn.zeabur.com/marketplace/minio.svg
+          template: PREBUILT_V2
+          spec:
+            source:
+                image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
+                command:
+                    - /bin/sh
+                args:
+                    - -c
+                    - |
+                      minio server /data --console-address :9090 &
+                      MINIO_PID=$!
+                      while ! curl -s http://localhost:9000/minio/health/live; do
+                        echo 'Waiting for MinIO to start...'
+                        sleep 1
+                      done
+                      sleep 5
+                      mc alias set myminio http://localhost:9000 $MINIO_USERNAME $MINIO_PASSWORD
+                      echo "Creating bucket '$MINIO_DEFAULT_BUCKET'"
+                      mc mb myminio/$MINIO_DEFAULT_BUCKET
+                      mc anonymous set download myminio/$MINIO_DEFAULT_BUCKET
+                      wait $MINIO_PID
+            ports:
+                - id: web
+                  port: 9000
+                  type: HTTP
+                - id: console
+                  port: 9090
+                  type: HTTP
+            volumes:
+                - id: data
+                  dir: /data
+            instructions:
+                - title: MinIO Console
+                  content: ${MINIO_CONSOLE_URL}
+                - title: S3 Access Key ID
+                  content: ${MINIO_USERNAME}
+                - title: S3 Secret Access Key
+                  content: ${MINIO_PASSWORD}
+                - title: S3 Bucket Name
+                  content: ${MINIO_DEFAULT_BUCKET}
+                - title: S3 Endpoint
+                  content: http://${CONTAINER_HOSTNAME}:9000
+            env:
+                MINIO_BROWSER_REDIRECT:
+                    default: "false"
+                    expose: false
+                MINIO_CONSOLE_URL:
+                    default: ${ZEABUR_CONSOLE_URL}
+                    expose: true
+                MINIO_DEFAULT_BUCKET:
+                    default: twenty
+                    expose: true
+                MINIO_PASSWORD:
+                    default: ${MINIO_ROOT_PASSWORD}
+                    expose: true
+                MINIO_ROOT_PASSWORD:
+                    default: ${PASSWORD}
+                    expose: false
+                MINIO_ROOT_USER:
+                    default: minio
+                    expose: false
+                MINIO_S3_ENDPOINT:
+                    default: http://${CONTAINER_HOSTNAME}:9000
+                    expose: true
+                MINIO_USERNAME:
+                    default: ${MINIO_ROOT_USER}
+                    expose: true
+            configs: []
+            portForwarding:
+                enabled: false
+        - name: Twenty Worker
+          icon: https://github.com/twentyhq/twenty/raw/main/packages/twenty-website/public/images/core/logo.svg
+          dependencies:
+            - PostgreSQL
+            - Redis
+            - MinIO
+            - Twenty
+          template: PREBUILT_V2
+          spec:
+            source:
+                image: twentycrm/twenty:v1
+                command:
+                    - yarn
+                    - worker:prod
+            env:
+                APP_SECRET:
+                    default: ${PASSWORD}
+                    expose: false
+                AWS_ACCESS_KEY_ID:
+                    default: ${MINIO_USERNAME}
+                    expose: false
+                AWS_SECRET_ACCESS_KEY:
+                    default: ${MINIO_PASSWORD}
+                    expose: false
+                DISABLE_CRON_JOBS_REGISTRATION:
+                    default: "true"
+                    expose: false
+                DISABLE_DB_MIGRATIONS:
+                    default: "true"
+                    expose: false
+                PG_DATABASE_URL:
+                    default: ${POSTGRES_CONNECTION_STRING}
+                    expose: true
+                REDIS_URL:
+                    default: ${REDIS_CONNECTION_STRING}
+                    expose: true
+                STORAGE_S3_ENDPOINT:
+                    default: ${MINIO_S3_ENDPOINT}
+                    expose: false
+                STORAGE_S3_NAME:
+                    default: ${MINIO_DEFAULT_BUCKET}
+                    expose: false
+                STORAGE_S3_REGION:
+                    default: us-east-1
+                    expose: false
+                STORAGE_TYPE:
+                    default: s3
+                    expose: false
+        - name: Twenty
+          icon: https://github.com/twentyhq/twenty/raw/main/packages/twenty-website/public/images/core/logo.svg
+          dependencies:
+            - PostgreSQL
+            - Redis
+            - MinIO
+          template: PREBUILT_V2
+          spec:
+            source:
+                image: twentycrm/twenty:v1
+            ports:
+                - id: web
+                  port: 3000
+                  type: HTTP
+            instructions:
+                - title: Open Twenty CRM
+                  content: https://${TWENTY_DOMAIN}.zeabur.app
+            env:
+                APP_SECRET:
+                    default: ${PASSWORD}
+                    expose: false
+                AWS_ACCESS_KEY_ID:
+                    default: ${MINIO_USERNAME}
+                    expose: false
+                AWS_SECRET_ACCESS_KEY:
+                    default: ${MINIO_PASSWORD}
+                    expose: false
+                DISABLE_CRON_JOBS_REGISTRATION:
+                    default: "false"
+                    expose: false
+                DISABLE_DB_MIGRATIONS:
+                    default: "false"
+                    expose: false
+                NODE_PORT:
+                    default: "3000"
+                    expose: false
+                PG_DATABASE_URL:
+                    default: ${POSTGRES_CONNECTION_STRING}
+                    expose: true
+                REDIS_URL:
+                    default: ${REDIS_CONNECTION_STRING}
+                    expose: true
+                SERVER_URL:
+                    default: https://${TWENTY_DOMAIN}.zeabur.app
+                    expose: false
+                STORAGE_S3_ENDPOINT:
+                    default: ${MINIO_S3_ENDPOINT}
+                    expose: false
+                STORAGE_S3_NAME:
+                    default: ${MINIO_DEFAULT_BUCKET}
+                    expose: false
+                STORAGE_S3_REGION:
+                    default: us-east-1
+                    expose: false
+                STORAGE_TYPE:
+                    default: s3
+                    expose: false
+          domainKey:
+            - port: web
+              variable: TWENTY_DOMAIN
+localization:
+    es-ES:
+        description: Una plataforma CRM de código abierto moderna que te ayuda a gestionar contactos, negociaciones y tareas de manera eficiente.
+        variables:
+            - key: TWENTY_DOMAIN
+              type: DOMAIN
+              name: Dominio
+              description: El dominio donde tu Twenty CRM será accesible
+        readme: |
+            # Twenty CRM
+
+            Twenty es una plataforma CRM de código abierto moderna construida con React, Node.js y PostgreSQL. Proporciona una solución completa para gestionar contactos, negociaciones, empresas y tareas.
+
+            ## Características
+
+            - **Gestión de Contactos**: Rastrea y organiza tus contactos con información detallada
+            - **Pipeline de Negociaciones**: Pipeline visual para gestionar oportunidades de venta
+            - **Gestión de Tareas**: Asigna y rastrea tareas entre equipos
+            - **Línea de Tiempo de Actividades**: Historial completo de actividades para cada contacto y negociación
+            - **Campos Personalizados**: Agrega campos personalizados para adaptar a tus necesidades comerciales
+            - **Soporte Multilenguaje**: Disponible en múltiples idiomas
+            - **Código Abierto**: Acceso completo al código fuente
+
+            ## Despliegue
+
+            Esta plantilla despliega automáticamente:
+            - Aplicación Web Twenty (Frontend React)
+            - Servidor Twenty (Backend Node.js)
+            - Proceso Worker en segundo plano para procesamiento de tareas
+            - Base de Datos PostgreSQL
+            - Redis para caché y almacenamiento de sesiones
+            - MinIO para almacenamiento de objetos compatible con S3
+
+            ## Notas de Configuración
+
+            ### Compartición de Variables de Entorno
+
+            El servicio Twenty Worker requiere acceso a la misma configuración que el servidor Twenty para funcionar correctamente. Variables clave como `PG_DATABASE_URL`, `REDIS_URL`, `APP_SECRET` y configuraciones de almacenamiento (`STORAGE_*`) deben exponerse y compartirse entre ambos servicios.
+
+            ### Modo de Configuración
+
+            Twenty soporta dos enfoques de configuración:
+
+            - **Basado en Base de Datos (Por defecto)**: Cuando `IS_CONFIG_VARIABLES_IN_DB_ENABLED=true`, la mayoría de configuraciones se gestionan a través de la UI de administración y se sincronizan automáticamente entre servidor y worker.
+
+            - **Solo Variables de Entorno**: Establece `IS_CONFIG_VARIABLES_IN_DB_ENABLED=false` para gestionar toda la configuración mediante variables de entorno. Esto requiere reiniciar los contenedores para que los cambios surtan efecto, pero proporciona despliegues más predecibles.
+
+            Para despliegues autoalojados donde deseas control total mediante variables de entorno, se recomienda establecer `IS_CONFIG_VARIABLES_IN_DB_ENABLED=false` en los servicios Twenty servidor y Twenty Worker.
+
+            ## Credenciales por Defecto
+
+            Después del despliegue, visita el dominio de la aplicación para crear tu cuenta de administrador.
+
+            ## Acceso Externo
+
+            La aplicación estará disponible en el dominio que especificaste durante el despliegue.
+    id-ID:
+        description: Platform CRM Open Source modern yang membantu Anda mengelola kontak, transaksi, dan tugas secara efisien.
+        variables:
+            - key: TWENTY_DOMAIN
+              type: DOMAIN
+              name: Domain
+              description: Domain tempat Twenty CRM Anda dapat diakses
+        readme: |
+            # Twenty CRM
+
+            Twenty adalah platform CRM Open Source modern yang dibangun dengan React, Node.js, dan PostgreSQL. Platform ini menyediakan solusi lengkap untuk mengelola kontak, transaksi, perusahaan, dan tugas.
+
+            ## Fitur
+
+            - **Manajemen Kontak**: Lacak dan atur kontak Anda dengan informasi detail
+            - **Pipeline Transaksi**: Pipeline visual untuk mengelola peluang penjualan
+            - **Manajemen Tugas**: Tetapkan dan lacak tugas di seluruh tim
+            - **Timeline Aktivitas**: Riwayat aktivitas lengkap untuk setiap kontak dan transaksi
+            - **Field Kustom**: Tambahkan field kustom untuk menyesuaikan dengan kebutuhan bisnis Anda
+            - **Dukungan Multi-bahasa**: Tersedia dalam berbagai bahasa
+            - **Open Source**: Akses penuh ke kode sumber
+
+            ## Deployment
+
+            Template ini secara otomatis men-deploy:
+            - Aplikasi Web Twenty (Frontend React)
+            - Server Twenty (Backend Node.js)
+            - Background Worker untuk pemrosesan tugas
+            - Database PostgreSQL
+            - Redis untuk caching dan penyimpanan sesi
+            - MinIO untuk penyimpanan objek yang kompatibel dengan S3
+
+            ## Catatan Konfigurasi
+
+            ### Berbagi Variabel Lingkungan
+
+            Layanan Twenty Worker memerlukan akses ke konfigurasi yang sama dengan server Twenty agar dapat berfungsi dengan baik. Variabel kunci seperti `PG_DATABASE_URL`, `REDIS_URL`, `APP_SECRET`, dan pengaturan penyimpanan (`STORAGE_*`) harus diekspos dan dibagikan antara kedua layanan.
+
+            ### Mode Konfigurasi
+
+            Twenty mendukung dua pendekatan konfigurasi:
+
+            - **Berbasis Database (Default)**: Ketika `IS_CONFIG_VARIABLES_IN_DB_ENABLED=true`, sebagian besar pengaturan dapat dikelola melalui UI admin dan secara otomatis tersinkronisasi antara server dan worker.
+
+            - **Hanya Variabel Lingkungan**: Atur `IS_CONFIG_VARIABLES_IN_DB_ENABLED=false` untuk mengelola semua konfigurasi melalui variabel lingkungan. Ini memerlukan restart container agar perubahan berlaku, tetapi memberikan deployment yang lebih dapat diprediksi.
+
+            Untuk deployment self-hosted di mana Anda menginginkan kontrol penuh melalui variabel lingkungan, disarankan untuk mengatur `IS_CONFIG_VARIABLES_IN_DB_ENABLED=false` pada layanan Twenty server dan Twenty Worker.
+
+            ## Kredensial Default
+
+            Setelah deployment, buat akun admin Anda dengan mengunjungi domain aplikasi.
+
+            ## Akses Eksternal
+
+            Aplikasi akan tersedia di domain yang Anda tentukan selama deployment.
+    ja-JP:
+        description: 連絡先、取引、タスクを効率的に管理できるモダンなオープンソース CRM プラットフォーム。
+        variables:
+            - key: TWENTY_DOMAIN
+              type: DOMAIN
+              name: ドメイン
+              description: Twenty CRM にアクセス可能なドメイン
+        readme: |
+            # Twenty CRM
+
+            Twenty は、React、Node.js、PostgreSQL で構築されたモダンなオープンソース CRM プラットフォームです。連絡先、取引、企業、タスクを管理するための完全なソリューションを提供します。
+
+            ## 機能
+
+            - **連絡先管理**：詳細な情報で連絡先をトラッキング・整理
+            - **取引パイプライン**：販売機会を管理する視覚的なパイプライン
+            - **タスク管理**：チーム間でタスクを割り当て・トラッキング
+            - **アクティビティタイムライン**：各連絡先・取引の完全な活動履歴
+            - **カスタムフィールド**：ビジネスニーズに適応するカスタムフィールドの追加
+            - **多言語サポート**：複数の言語で利用可能
+            - **オープンソース**：ソースコードへのフルアクセス
+
+            ## デプロイ
+
+            このテンプレートは以下を自動的にデプロイします：
+            - Twenty Web アプリケーション（React フロントエンド）
+            - Twenty サーバー（Node.js バックエンド）
+            - タスク処理のためのバックグラウンドワーカー
+            - PostgreSQL データベース
+            - キャッシュとセッションストレージ用の Redis
+            - MinIO S3互換オブジェクトストレージ
+
+            ## 設定に関する注意事項
+
+            ### 環境変数の共有
+
+            Twenty Worker サービスが正常に機能するためには、Twenty サーバーと同じ設定にアクセスする必要があります。`PG_DATABASE_URL`、`REDIS_URL`、`APP_SECRET`、ストレージ設定（`STORAGE_*`）などの主要な変数は、両方のサービス間で公開および共有する必要があります。
+
+            ### 設定モード
+
+            Twenty は2つの設定アプローチをサポートしています：
+
+            - **データベース駆動（デフォルト）**：`IS_CONFIG_VARIABLES_IN_DB_ENABLED=true` の場合、ほとんどの設定は管理UIを通じて管理でき、サーバーとワーカー間で自動的に同期されます。
+
+            - **環境変数のみ**：すべての設定を環境変数で管理するには、`IS_CONFIG_VARIABLES_IN_DB_ENABLED=false` を設定します。変更を反映するにはコンテナの再起動が必要ですが、より予測可能なデプロイメントを提供します。
+
+            環境変数で完全に制御したいセルフホスティングデプロイメントの場合、Twenty サーバーと Twenty Worker の両方のサービスで `IS_CONFIG_VARIABLES_IN_DB_ENABLED=false` を設定することをお勧めします。
+
+            ## デフォルト認証情報
+
+            デプロイ後、アプリケーションドメインにアクセスして管理者アカウントを作成してください。
+
+            ## 外部アクセス
+
+            アプリケーションは、デプロイ中に指定したドメインで利用可能になります。
+    zh-CN:
+        description: 一个现代化的开源 CRM 平台，帮助您高效管理联系人、交易和任务。
+        variables:
+            - key: TWENTY_DOMAIN
+              type: DOMAIN
+              name: 域名
+              description: 您的 Twenty CRM 可访问的域名
+        readme: |
+            # Twenty CRM
+
+            Twenty 是一个基于 React、Node.js 和 PostgreSQL 构建的现代化开源 CRM 平台。它提供了管理联系人、交易、公司和任务的完整解决方案。
+
+            ## 功能特性
+
+            - **联系人管理**：追踪和组织您的联系人，包含详细信息
+            - **销售管道**：可视化管道管理销售机会
+            - **任务管理**：跨团队分配和追踪任务
+            - **活动时间线**：每个联系人和交易的完整活动历史
+            - **自定义字段**：添加自定义字段以适应您的业务需求
+            - **多语言支持**：支持多种语言
+            - **开源**：完全访问源代码
+
+            ## 部署
+
+            此模板自动部署：
+            - Twenty Web 应用（React 前端）
+            - Twenty 服务器（Node.js 后端）
+            - 后台任务处理工作进程
+            - PostgreSQL 数据库
+            - Redis 缓存和会话存储
+            - MinIO S3 兼容对象存储
+
+            ## 配置说明
+
+            ### 环境变量共享
+
+            Twenty Worker 服务需要访问与 Twenty 服务器相同的配置才能正常工作。关键变量如 `PG_DATABASE_URL`、`REDIS_URL`、`APP_SECRET` 和存储设置（`STORAGE_*`）必须在两个服务之间暴露和共享。
+
+            ### 配置模式
+
+            Twenty 支持两种配置方式：
+
+            - **数据库驱动（默认）**：当 `IS_CONFIG_VARIABLES_IN_DB_ENABLED=true` 时，大多数设置可以通过管理界面进行管理，并在服务器和 Worker 之间自动同步。
+
+            - **仅环境变量**：设置 `IS_CONFIG_VARIABLES_IN_DB_ENABLED=false` 以通过环境变量管理所有配置。这需要重启容器才能使更改生效，但提供更可预测的部署。
+
+            对于希望通过环境变量完全控制的自托管部署，建议在 Twenty 服务器和 Twenty Worker 服务上都设置 `IS_CONFIG_VARIABLES_IN_DB_ENABLED=false`。
+
+            ## 默认凭据
+
+            部署完成后，请访问应用域名创建管理员账户。
+
+            ## 外部访问
+
+            应用将在部署期间指定的域名上可用。
+    zh-TW:
+        description: 一個現代化的開源 CRM 平台，協助您高效管理聯絡人、交易和任務。
+        variables:
+            - key: TWENTY_DOMAIN
+              type: DOMAIN
+              name: 網域
+              description: 您的 Twenty CRM 可存取的網域
+        readme: |-
+            # Twenty CRM
+
+            Twenty 是一個基於 React、Node.js 和 PostgreSQL 建構的現代化開源 CRM 平台。它提供了管理聯絡人、交易、公司和任務的完整解決方案。
+
+            ## 功能特性
+
+            - **聯絡人管理**：追蹤和組織您的聯絡人，包含詳細資訊
+            - **銷售管道**：視覺化管道管理銷售機會
+            - **任務管理**：跨團隊分配和追蹤任務
+            - **活動時間軸**：每個聯絡人和交易的完整活動歷史
+            - **自訂欄位**：新增自訂欄位以適應您的業務需求
+            - **多語言支援**：支援多種語言
+            - **開源**：完全存取原始碼
+
+            ## 部署
+
+            此範本自動部署：
+            - Twenty Web 應用程式（React 前端）
+            - Twenty 伺服器（Node.js 後端）
+            - 後台任務處理工作程序
+            - PostgreSQL 資料庫
+            - Redis 快取和會話儲存
+            - MinIO S3 相容物件儲存
+
+            ## 設定說明
+
+            ### 環境變數共享
+
+            Twenty Worker 服務需要存取與 Twenty 伺服器相同的設定才能正常運作。關鍵變數如 `PG_DATABASE_URL`、`REDIS_URL`、`APP_SECRET` 和儲存設定（`STORAGE_*`）必須在兩個服務之間暴露和共享。
+
+            ### 設定模式
+
+            Twenty 支援兩種設定方式：
+
+            - **資料庫驅動（預設）**：當 `IS_CONFIG_VARIABLES_IN_DB_ENABLED=true` 時，大多數設定可以透過管理介面進行管理，並在伺服器和 Worker 之間自動同步。
+
+            - **僅環境變數**：設定 `IS_CONFIG_VARIABLES_IN_DB_ENABLED=false` 以透過環境變數管理所有設定。這需要重新啟動容器才能使變更生效，但提供更可預測的部署。
+
+            對於希望透過環境變數完全控制的自架部署，建議在 Twenty 伺服器和 Twenty Worker 服務上都設定 `IS_CONFIG_VARIABLES_IN_DB_ENABLED=false`。
+
+            ## 預設憑證
+
+            部署完成後，請造訪應用程式網域建立管理員帳戶。
+
+            ## 外部存取
+
+            應用程式將在部署期間指定的網域上可用。
