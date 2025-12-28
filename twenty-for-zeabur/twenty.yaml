@@ -1,0 +1,650 @@
+apiVersion: zeabur.com/v1
+kind: Template
+metadata:
+  name: Twenty CRM
+spec:
+  description: Modern open-source CRM platform for managing contacts, companies, and deals
+  icon: https://raw.githubusercontent.com/twentyhq/twenty/main/packages/twenty-website/public/images/core/logo.svg
+  coverImage: https://raw.githubusercontent.com/twentyhq/twenty/refs/heads/main/packages/twenty-website/public/images/readme/github-cover-light.png
+  variables:
+    - key: PUBLIC_DOMAIN
+      type: DOMAIN
+      name: Domain
+      description: What is the domain you want for your Twenty CRM instance?
+    - key: APP_SECRET
+      type: PASSWORD
+      name: App Secret
+      description: Secret key for encrypting session tokens and cookies (auto-generated if empty)
+    - key: STORAGE_TYPE
+      type: STRING
+      name: Storage Type
+      description: Enter local for local storage or s3 for S3-compatible cloud storage (default is local)
+    - key: STORAGE_S3_REGION
+      type: STRING
+      name: S3 Region
+      description: S3 region for cloud storage (only required when STORAGE_TYPE is 's3')
+    - key: STORAGE_S3_NAME
+      type: STRING
+      name: S3 Bucket Name
+      description: S3 bucket name for cloud storage (only required when STORAGE_TYPE is 's3')
+    - key: STORAGE_S3_ENDPOINT
+      type: STRING
+      name: S3 Endpoint
+      description: S3 endpoint URL for cloud storage (only required when STORAGE_TYPE is 's3')
+  tags:
+    - CRM
+    - Business
+    - Open Source
+    - Twenty CRM
+  readme: |-
+    # Twenty CRM (create by SEAFOODHOLDHAND)
+
+    [![Twenty CRM](https://i.imgur.com/gi4FDrn.png)](https://www.youtube.com/@seafoodholdhand)
+
+    **Twenty CRM** is a modern, open-source CRM platform designed for flexibility and ease of use. This template includes:
+
+    - **Twenty Server** - Main CRM application for managing contacts, companies, and deals
+    - **Twenty Worker** - Background job processor for tasks like email sending and data sync
+    - **PostgreSQL** - Reliable database for all your CRM data
+    - **Redis** - Fast cache and queue management for background jobs
+
+    ## Features
+
+    With Twenty CRM, you can:
+
+    - Manage contacts, companies, and deals in a modern interface
+    - Track activities and communications with your prospects
+    - Customize fields and workflows to fit your business needs
+    - Use real-time collaboration with your team
+    - Integrate with popular tools via webhooks and API
+    - Store files locally or use S3-compatible cloud storage
+
+    ## Storage Options
+
+    This template supports two storage modes:
+
+    ### Local Storage (Default)
+    - Files are stored in the container's local storage
+    - Simple setup with no additional configuration needed
+    - Suitable for development and testing
+
+    ### S3-Compatible Cloud Storage (Optional)
+    To use S3 or S3-compatible storage (like AWS S3, MinIO, Wasabi, etc.), fill in:
+    - **S3 Region**: e.g., `us-east-1`, `eu-west-3`
+    - **S3 Bucket Name**: Your bucket name
+    - **S3 Endpoint**: The API endpoint URL (e.g., `https://s3.amazonaws.com`)
+
+    If any S3 field is empty, the template will use local storage.
+
+    ## Deployment
+
+    Simply deploy this template and provide your domain. The system will:
+
+    1. Set up PostgreSQL and Redis databases
+    2. Configure the Twenty server with your domain
+    3. Start the background worker for job processing
+    4. Generate a secure app secret automatically if not provided
+
+    **Important:** After deployment, please wait approximately **5 minutes** for the application to fully initialize and complete database migrations before accessing your CRM.
+
+    Once initialization is complete, access your CRM at your configured domain and complete the initial setup wizard.
+
+    ## Update Log
+
+    ### 2025-12-28
+    - Initial template release for Zeabur
+    - Support for both local and S3 storage
+    - Full localization support (EN, zh-CN, zh-TW, ja-JP)
+    - Worker configuration for background job processing
+
+    If you encounter any issues during deployment, please let me know via GitHub issues:
+    [https://github.com/glasschan/twenty-for-zeabur](https://github.com/glasschan/twenty-for-zeabur)
+
+    Learn more about Twenty CRM: [https://twenty.com](https://twenty.com)
+  services:
+    - name: postgresql
+      icon: https://raw.githubusercontent.com/zeabur/service-icons/main/marketplace/postgresql.svg
+      template: PREBUILT_V2
+      spec:
+        source:
+          image: postgres:16
+          command:
+            - docker-entrypoint.sh
+            - -c
+            - config_file=/etc/postgresql/postgresql.conf
+        ports:
+          - id: database
+            port: 5432
+            type: TCP
+        volumes:
+          - id: data
+            dir: /var/lib/postgresql/data
+        instructions:
+          - type: TEXT
+            title: Connection String
+            content: postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@${PORT_FORWARDED_HOSTNAME}:${DATABASE_PORT_FORWARDED_PORT}/${POSTGRES_DATABASE}
+          - type: TEXT
+            title: PostgreSQL Connect Command
+            content: psql "postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@${PORT_FORWARDED_HOSTNAME}:${DATABASE_PORT_FORWARDED_PORT}/${POSTGRES_DATABASE}"
+          - type: TEXT
+            title: PostgreSQL username
+            content: ${POSTGRES_USERNAME}
+            category: Credentials
+          - type: PASSWORD
+            title: PostgreSQL password
+            content: ${POSTGRES_PASSWORD}
+            category: Credentials
+          - type: TEXT
+            title: PostgreSQL database
+            content: ${POSTGRES_DATABASE}
+            category: Credentials
+          - type: TEXT
+            title: PostgreSQL host
+            content: ${PORT_FORWARDED_HOSTNAME}
+            category: Hostname & Port
+          - type: TEXT
+            title: PostgreSQL port
+            content: ${DATABASE_PORT_FORWARDED_PORT}
+            category: Hostname & Port
+        env:
+          PGDATA:
+            default: /var/lib/postgresql/data/pgdata
+            expose: false
+          POSTGRES_CONNECTION_STRING:
+            default: postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}
+            expose: false
+          POSTGRES_DATABASE:
+            default: ${POSTGRES_DB}
+            expose: true
+          POSTGRES_DB:
+            default: twenty
+            expose: true
+          POSTGRES_HOST:
+            default: ${CONTAINER_HOSTNAME}
+            expose: true
+          POSTGRES_PASSWORD:
+            default: ${PASSWORD}
+            expose: true
+          POSTGRES_PORT:
+            default: ${DATABASE_PORT}
+            expose: true
+          POSTGRES_URI:
+            default: ${POSTGRES_CONNECTION_STRING}
+            expose: true
+          POSTGRES_USER:
+            default: twenty
+            expose: false
+          POSTGRES_USERNAME:
+            default: ${POSTGRES_USER}
+            expose: true
+        configs:
+          - path: /etc/postgresql/postgresql.conf
+            template: |
+              # https://github.com/postgres/postgres/blob/master/src/backend/utils/misc/postgresql.conf.sample
+              listen_addresses = '*'
+              max_connections = 100
+              shared_buffers = 128MB
+              dynamic_shared_memory_type = posix
+              max_wal_size = 1GB
+              min_wal_size = 80MB
+              log_timezone = 'Etc/UTC'
+              datestyle = 'iso, mdy'
+              timezone = 'Etc/UTC'
+              lc_messages = 'en_US.utf8'
+              lc_monetary = 'en_US.utf8'
+              lc_numeric = 'en_US.utf8'
+              lc_time = 'en_US.utf8'
+              default_text_search_config = 'pg_catalog.english'
+            permission: null
+            envsubst: null
+    - name: redis
+      icon: https://raw.githubusercontent.com/zeabur/service-icons/main/marketplace/redis.svg
+      template: PREBUILT_V2
+      spec:
+        source:
+          image: redis/redis-stack-server:latest
+        ports:
+          - id: database
+            port: 6379
+            type: TCP
+        volumes:
+          - id: data
+            dir: /data
+        instructions:
+          - type: TEXT
+            title: Command to connect to your Redis
+            content: redis-cli -h ${PORT_FORWARDED_HOSTNAME} -p ${DATABASE_PORT_FORWARDED_PORT} -a ${REDIS_PASSWORD}
+          - type: TEXT
+            title: Redis Connection String
+            content: redis://:${REDIS_PASSWORD}@${PORT_FORWARDED_HOSTNAME}:${DATABASE_PORT_FORWARDED_PORT}
+          - type: PASSWORD
+            title: Redis password
+            content: ${REDIS_PASSWORD}
+            category: Credentials
+          - type: TEXT
+            title: Redis host
+            content: ${PORT_FORWARDED_HOSTNAME}
+            category: Hostname & Port
+          - type: TEXT
+            title: Redis port
+            content: ${DATABASE_PORT_FORWARDED_PORT}
+            category: Hostname & Port
+        env:
+          CONFFILE:
+            default: /etc/redis-stack.conf
+            expose: false
+          REDIS_ARGS:
+            default: --requirepass ${REDIS_PASSWORD}
+            expose: false
+          REDIS_CONNECTION_STRING:
+            default: redis://:${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_PORT}
+            expose: true
+          REDIS_HOST:
+            default: ${CONTAINER_HOSTNAME}
+            expose: true
+          REDIS_PASSWORD:
+            default: ${PASSWORD}
+            expose: true
+          REDIS_PORT:
+            default: ${DATABASE_PORT}
+            expose: true
+          REDIS_URI:
+            default: ${REDIS_CONNECTION_STRING}
+            expose: true
+        configs:
+          - path: /etc/redis-stack.conf
+            template: |
+              port 6379
+              daemonize no
+            permission: null
+            envsubst: null
+        portForwarding:
+          enabled: true
+    - name: twenty-server
+      icon: https://raw.githubusercontent.com/twentyhq/twenty/main/packages/twenty-website/public/images/core/logo.svg
+      template: PREBUILT_V2
+      domainKey: PUBLIC_DOMAIN
+      spec:
+        source:
+          image: twentycrm/twenty:latest
+        ports:
+          - id: web
+            port: 3000
+            type: HTTP
+        volumes:
+          - id: data
+            dir: /app/packages/twenty-server/.local-storage
+        instructions:
+          - type: TEXT
+            title: Access URL
+            content: ${ZEABUR_WEB_URL}
+          - type: PASSWORD
+            title: App Secret
+            content: ${APP_SECRET}
+            category: Credentials
+        dependencies:
+          - postgresql
+          - redis
+        env:
+          NODE_PORT:
+            default: "3000"
+            expose: false
+          PG_DATABASE_URL:
+            default: postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}
+            expose: false
+          SERVER_URL:
+            default: https://${PUBLIC_DOMAIN}
+            expose: false
+          REDIS_URL:
+            default: redis://:${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_PORT}
+            expose: false
+          APP_SECRET:
+            default: ${PASSWORD}
+            expose: false
+          STORAGE_TYPE:
+            default: ${STORAGE_TYPE:-local}
+            expose: false
+          STORAGE_S3_REGION:
+            default: ${STORAGE_S3_REGION}
+            expose: false
+          STORAGE_S3_NAME:
+            default: ${STORAGE_S3_NAME}
+            expose: false
+          STORAGE_S3_ENDPOINT:
+            default: ${STORAGE_S3_ENDPOINT}
+            expose: false
+          DISABLE_DB_MIGRATIONS:
+            default: "false"
+            expose: false
+          DISABLE_CRON_JOBS_REGISTRATION:
+            default: "false"
+            expose: false
+          IS_CONFIG_VARIABLES_IN_DB_ENABLED:
+            default: "false"
+            expose: false
+        configs: []
+    - name: twenty-worker
+      icon: https://raw.githubusercontent.com/twentyhq/twenty/main/packages/twenty-website/public/images/core/logo.svg
+      template: PREBUILT_V2
+      spec:
+        source:
+          image: twentycrm/twenty:latest
+          command:
+            - yarn
+          args:
+            - worker:prod
+        volumes:
+          - id: data
+            dir: /app/packages/twenty-server/.local-storage
+        dependencies:
+          - postgresql
+          - redis
+          - twenty-server
+        env:
+          PG_DATABASE_URL:
+            default: postgresql://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}
+            expose: false
+          SERVER_URL:
+            default: https://${PUBLIC_DOMAIN}
+            expose: false
+          REDIS_URL:
+            default: redis://:${REDIS_PASSWORD}@${REDIS_HOST}:${REDIS_PORT}
+            expose: false
+          APP_SECRET:
+            default: ${APP_SECRET}
+            expose: false
+          STORAGE_TYPE:
+            default: ${STORAGE_TYPE:-local}
+            expose: false
+          STORAGE_S3_REGION:
+            default: ${STORAGE_S3_REGION}
+            expose: false
+          STORAGE_S3_NAME:
+            default: ${STORAGE_S3_NAME}
+            expose: false
+          STORAGE_S3_ENDPOINT:
+            default: ${STORAGE_S3_ENDPOINT}
+            expose: false
+          DISABLE_DB_MIGRATIONS:
+            default: "true"
+            expose: false
+          DISABLE_CRON_JOBS_REGISTRATION:
+            default: "true"
+            expose: false
+          IS_CONFIG_VARIABLES_IN_DB_ENABLED:
+            default: "false"
+            expose: false
+        configs: []
+localization:
+  zh-TW:
+    description: 現代開源 CRM 平台，用於管理聯繫人、公司和交易
+    variables:
+      - key: PUBLIC_DOMAIN
+        type: DOMAIN
+        name: 網域
+        description: 你想將 Twenty CRM 綁定在哪个網域上？
+      - key: APP_SECRET
+        type: PASSWORD
+        name: 應用程式密鑰
+        description: 用於加密會話令牌和 Cookie 的密鑰（如果留空則自動生成）
+      - key: STORAGE_TYPE
+        type: STRING
+        name: 儲存類型
+        description: 輸入 local 使用本地儲存或 s3 使用 S3 相容雲端儲存（預設為 local）
+      - key: STORAGE_S3_REGION
+        type: STRING
+        name: S3 區域
+        description: 雲端儲存的 S3 區域（僅在 STORAGE_TYPE 為 s3 時需要）
+      - key: STORAGE_S3_NAME
+        type: STRING
+        name: S3 儲存桶名稱
+        description: 雲端儲存的 S3 儲存桶名稱（僅在 STORAGE_TYPE 為 s3 時需要）
+      - key: STORAGE_S3_ENDPOINT
+        type: STRING
+        name: S3 端點
+        description: 雲端儲存的 S3 端點 URL（僅在 STORAGE_TYPE 為 s3 時需要）
+    readme: |-
+      # Twenty CRM
+
+      **Twenty CRM** 是一個現代的開源 CRM 平台，專為靈活性和易用性而設計。此模板包含：
+
+      - **Twenty Server** - 用於管理聯繫人、公司和交易的主要 CRM 應用程式
+      - **Twenty Worker** - 用於電子郵件發送和數據同步等任務的背景工作程序
+      - **PostgreSQL** - 用於所有 CRM 數據的可靠數據庫
+      - **Redis** - 用於背景任務的快速快取和隊列管理
+
+      ## 功能特色
+
+      使用 Twenty CRM，你可以：
+
+      - 在現代化介面中管理聯繫人、公司和交易
+      - 追蹤與潛在客戶的活動和溝通
+      - 自訂欄位和工作流程以適應你的業務需求
+      - 與團隊進行即時協作
+      - 透過 Webhook 和 API 整合熱門工具
+      - 在本地儲存檔案或使用 S3 相容的雲端儲存
+
+      ## 儲存選項
+
+      此模板支援兩種儲存模式：
+
+      ### 本地儲存（預設）
+      - 檔案儲存在容器的本地儲存中
+      - 無需額外配置的簡單設置
+      - 適合開發和測試
+
+      ### S3 相容雲端儲存（可選）
+      要使用 S3 或 S3 相容儲存（如 AWS S3、MinIO、Wasabi 等），請填寫：
+      - **S3 區域**：例如 `us-east-1`、`eu-west-3`
+      - **S3 儲存桶名稱**：你的儲存桶名稱
+      - **S3 端點**：API 端點 URL（例如 `https://s3.amazonaws.com`）
+
+      如果任何 S3 欄位為空，模板將使用本地儲存。
+
+      ## 部署
+
+      只需部署此模板並提供你的網域。系統將會：
+
+      1. 設置 PostgreSQL 和 Redis 數據庫
+      2. 使用你的網域配置 Twenty 伺服器
+      3. 啟動背景工作程序以處理任務
+      4. 如果未提供，則自動生成安全的應用程式密鑰
+
+      **重要提示**：部署完成後，請等待約 **5 分鐘** 讓應用程式完全初始化並完成數據庫遷移，然後再存取你的 CRM。
+
+      初始化完成後，在配置的網域存取你的 CRM 並完成初始設置精靈。
+
+      ## 更新日誌
+
+      ### 2025-12-28
+      - Zeabur 初始模板版本
+      - 支援本地和 S3 儲存
+      - 完整的本地化支援（EN、zh-CN、zh-TW、ja-JP）
+      - 用於背景任務處理的工作程序配置
+
+      如果在部署期間遇到任何問題，請透過 GitHub issues 告訴我：
+      [https://github.com/glasschan/twenty-for-zeabur](https://github.com/glasschan/twenty-for-zeabur)
+
+      了解更多關於 Twenty CRM：[https://twenty.com](https://twenty.com)
+
+  ja-JP:
+    description: 連絡先、会社、取引を管理するためのモダンなオープンソース CRM プラットフォーム
+    variables:
+      - key: PUBLIC_DOMAIN
+        type: DOMAIN
+        name: ドメイン
+        description: Twenty CRM インスタンスに使用したいドメインは何ですか？
+      - key: APP_SECRET
+        type: PASSWORD
+        name: アプリシークレット
+        description: セッショントークンと Cookie を暗号化するための秘密鍵（空の場合は自動生成）
+      - key: STORAGE_TYPE
+        type: STRING
+        name: ストレージタイプ
+        description: local はローカルストレージ、s3 は S3 互換クラウドストレージ（デフォルトは local）
+      - key: STORAGE_S3_REGION
+        type: STRING
+        name: S3 リージョン
+        description: クラウドストレージの S3 リージョン（STORAGE_TYPE が s3 の場合のみ必須）
+      - key: STORAGE_S3_NAME
+        type: STRING
+        name: S3 バケット名
+        description: クラウドストレージの S3 バケット名（STORAGE_TYPE が s3 の場合のみ必須）
+      - key: STORAGE_S3_ENDPOINT
+        type: STRING
+        name: S3 エンドポイント
+        description: クラウドストレージの S3 エンドポイント URL（STORAGE_TYPE が s3 の場合のみ必須）
+    readme: |-
+      # Twenty CRM
+
+      **Twenty CRM** は、柔軟性と使いやすさを念頭に設計されたモダンなオープンソース CRM プラットフォームです。このテンプレートには以下が含まれています：
+
+      - **Twenty Server** - 連絡先、会社、取引を管理するメインの CRM アプリケーション
+      - **Twenty Worker** - メール送信やデータ同期などのタスク用のバックグラウンドジョブプロセッサ
+      - **PostgreSQL** - すべての CRM データ用の信頼性の高いデータベース
+      - **Redis** - バックグラウンドジョブ用の高速キャッシュとキュー管理
+
+      ## 機能
+
+      Twenty CRM を使用すると、以下のことができます：
+
+      - モダンなインターフェースで連絡先、会社、取引を管理
+      - 見込み客とのアクティビティとコミュニケーションを追跡
+      - ビジネスニーズに合わせてフィールドとワークフローをカスタマイズ
+      - チームとのリアルタイムコラボレーション
+      - Webhook と API による人気ツールとの統合
+      - ファイルをローカルに保存、または S3 互換クラウドストレージを使用
+
+      ## ストレージオプション
+
+      このテンプレートは 2 つのストレージモードをサポートしています：
+
+      ### ローカルストレージ（デフォルト）
+      - ファイルはコンテナのローカルストレージに保存されます
+      - 追加の設定不要の簡単なセットアップ
+      - 開発とテストに適しています
+
+      ### S3 互換クラウドストレージ（オプション）
+      S3 または S3 互換ストレージ（AWS S3、MinIO、Wasabi など）を使用するには、以下を入力します：
+      - **S3 リージョン**：例 `us-east-1`、`eu-west-3`
+      - **S3 バケット名**：バケット名
+      - **S3 エンドポイント**：API エンドポイント URL（例 `https://s3.amazonaws.com`）
+
+      S3 フィールドが空の場合、テンプレートはローカルストレージを使用します。
+
+      ## デプロイ
+
+      このテンプレートをデプロイしてドメインを提供するだけです。システムは以下を行います：
+
+      1. PostgreSQL と Redis データベースをセットアップ
+      2. ドメインを使用して Twenty サーバーを設定
+      3. ジョブ処理用のバックグラウンドワーカーを開始
+      4. 提供されない場合、安全なアプリシークレットを自動生成
+
+      **重要**：デプロイ後、アプリケーションが完全に初期化され、データベースの移行が完了するまで約 **5 分間**お待ちください。
+
+      初期化が完了したら、設定されたドメインで CRM にアクセスし、初期セットアップウィザードを完了してください。
+
+      ## 更新履歴
+
+      ### 2025-12-28
+      - Zeabur の初期テンプレートリリース
+      - ローカルおよび S3 ストレージのサポート
+      - 完全なローカライズサポート（EN、zh-CN、zh-TW、ja-JP）
+      - バックグラウンドジョブ処理用のワーカー設定
+
+      デプロイ中に問題が発生した場合は、GitHub issues でお知らせください：
+      [https://github.com/glasschan/twenty-for-zeabur](https://github.com/glasschan/twenty-for-zeabur)
+
+      Twenty CRM の詳細：[https://twenty.com](https://twenty.com)
+
+  zh-CN:
+    description: 现代开源 CRM 平台，用于管理联系人、公司和交易
+    variables:
+      - key: PUBLIC_DOMAIN
+        type: DOMAIN
+        name: 域名
+        description: 你想将 Twenty CRM 绑定在哪个域名上？
+      - key: APP_SECRET
+        type: PASSWORD
+        name: 应用密钥
+        description: 用于加密会话令牌和 Cookie 的密钥（如果留空则自动生成）
+      - key: STORAGE_TYPE
+        type: STRING
+        name: 存储类型
+        description: 输入 local 使用本地存储或 s3 使用 S3 兼容云存储（默认为 local）
+      - key: STORAGE_S3_REGION
+        type: STRING
+        name: S3 区域
+        description: 云存储的 S3 区域（仅在 STORAGE_TYPE 为 s3 时需要）
+      - key: STORAGE_S3_NAME
+        type: STRING
+        name: S3 存储桶名称
+        description: 云存储的 S3 存储桶名称（仅在 STORAGE_TYPE 为 s3 时需要）
+      - key: STORAGE_S3_ENDPOINT
+        type: STRING
+        name: S3 端点
+        description: 云存储的 S3 端点 URL（仅在 STORAGE_TYPE 为 s3 时需要）
+    readme: |-
+      # Twenty CRM
+
+      **Twenty CRM** 是一个现代化的开源 CRM 平台，专为灵活性和易用性而设计。此模板包含：
+
+      - **Twenty Server** - 用于管理联系人、公司和交易的主要 CRM 应用程序
+      - **Twenty Worker** - 用于电子邮件发送和数据同步等任务的后台工作进程
+      - **PostgreSQL** - 用于所有 CRM 数据的可靠数据库
+      - **Redis** - 用于后台任务的快速缓存和队列管理
+
+      ## 功能特色
+
+      使用 Twenty CRM，你可以：
+
+      - 在现代化界面中管理联系人、公司和交易
+      - 追踪与潜在客户的活动和沟通
+      - 自定义字段和工作流程以适应你的业务需求
+      - 与团队进行实时协作
+      - 通过 Webhook 和 API 集成热门工具
+      - 在本地存储文件或使用 S3 兼容的云存储
+
+      ## 存储选项
+
+      此模板支持两种存储模式：
+
+      ### 本地存储（默认）
+      - 文件存储在容器的本地存储中
+      - 无需额外配置的简单设置
+      - 适合开发和测试
+
+      ### S3 兼容云存储（可选）
+      要使用 S3 或 S3 兼容存储（如 AWS S3、MinIO、Wasabi 等），请填写：
+      - **S3 区域**：例如 `us-east-1`、`eu-west-3`
+      - **S3 存储桶名称**：你的存储桶名称
+      - **S3 端点**：API 端点 URL（例如 `https://s3.amazonaws.com`）
+
+      如果任何 S3 字段为空，模板将使用本地存储。
+
+      ## 部署
+
+      只需部署此模板并提供你的域名。系统将会：
+
+      1. 设置 PostgreSQL 和 Redis 数据库
+      2. 使用你的域名配置 Twenty 服务器
+      3. 启动后台工作进程以处理任务
+      4. 如果未提供，则自动生成安全的应用密钥
+
+      **重要提示**：部署完成后，请等待约 **5 分钟** 让应用程序完全初始化并完成数据库迁移，然后再访问你的 CRM。
+
+      初始化完成后，在配置的域名访问你的 CRM 并完成初始设置向导。
+
+      ## 更新日志
+
+      ### 2025-12-28
+      - Zeabur 初始模板版本
+      - 支持本地和 S3 存储
+      - 完整的本地化支持（EN、zh-CN、zh-TW、ja-JP）
+      - 用于后台任务处理的工作进程配置
+
+      如果在部署期间遇到任何问题，请通过 GitHub issues 告诉我：
+      [https://github.com/glasschan/twenty-for-zeabur](https://github.com/glasschan/twenty-for-zeabur)
+
+      了解更多关于 Twenty CRM：[https://twenty.com](https://twenty.com)
