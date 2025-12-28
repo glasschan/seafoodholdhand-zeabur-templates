@@ -11,10 +11,6 @@ spec:
       type: DOMAIN
       name: Domain
       description: What is the domain you want for your N8N instance?
-    - key: TASK_RUNNERS_AUTH_TOKEN
-      type: PASSWORD
-      name: Task Runners Auth Token
-      description: Shared secret for task runner authentication (auto-generated if empty)
   tags:
     - Automation
     - Workflow
@@ -203,6 +199,10 @@ spec:
             title: N8N ENCRYPTION KEY
             content: ${N8N_ENCRYPTION_KEY}
             category: Credentials
+          - type: PASSWORD
+            title: N8N RUNNERS AUTH TOKEN
+            content: ${N8N_RUNNERS_AUTH_TOKEN}
+            category: Credentials
         dependencies:
           - postgresql
           - Redis
@@ -265,10 +265,13 @@ spec:
             default: 0.0.0.0
             expose: false
           N8N_RUNNERS_AUTH_TOKEN:
-            default: ${TASK_RUNNERS_AUTH_TOKEN}
+            default: ${PASSWORD}
             expose: false
           N8N_ENCRYPTION_KEY_WORKER:
             default: ${N8N_ENCRYPTION_KEY}
+            expose: true
+          TASK_RUNNERS_AUTH_TOKEN:
+            default: ${N8N_RUNNERS_AUTH_TOKEN}
             expose: true
         configs: []
     - name: Redis
@@ -276,7 +279,7 @@ spec:
       template: PREBUILT_V2
       spec:
         source:
-          image: redis/redis-stack-server:latest
+          image: redis:7-alpine
         ports:
           - id: database
             port: 6379
@@ -328,7 +331,7 @@ spec:
       template: PREBUILT_V2
       spec:
         source:
-          image: docker.io/n8nio/n8n:latest
+          image: n8nio/n8n:stable
           command:
             - /bin/sh
           args:
@@ -418,7 +421,7 @@ spec:
             default: ${TASK_RUNNERS_AUTH_TOKEN}
             expose: false
           N8N_RUNNERS_TASK_BROKER_URI:
-            default: http://${N8N_WORKER_HOST}:5679
+            default: http://n8n-worker:5679
             expose: false
           N8N_RUNNERS_AUTO_SHUTDOWN_TIMEOUT:
             default: "15"
