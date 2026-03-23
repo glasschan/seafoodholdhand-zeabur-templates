@@ -51,6 +51,11 @@ spec:
 
     ## Update Log
 
+    ### 2026-03-23
+    - Fixed service dependencies placement to comply with Zeabur template schema (moved from inside `spec` to service level), ensuring correct startup ordering
+    - Removed deprecated `N8N_RUNNERS_ENABLED` environment variable (task runners are enabled by default in N8N v2)
+    - **Fixed task runner architecture**: Split single `Runners` into `N8N-Runners` (connects to `http://N8N:5679`) and `Worker-Runners` (connects to `http://Worker:5679`), matching the official n8n docker-compose setup where each n8n instance needs its own dedicated runner
+
     ### 2025-12-28
     - **IMPORTANT**: Template updated for N8N v2 compatibility
     - Upgraded to external task runners (production-recommended setup)
@@ -68,9 +73,7 @@ spec:
 
     ⚠️ Important: If you're using a previous version of this template, please update to this version to avoid potential encryption key synchronization issues.
 
-    Note: This template enables two critical environment variables to prevent future compatibility issues:
-
-    - `N8N_RUNNERS_ENABLED=true`: Enables task runners for executing Code node code securely. Task runners are required for JavaScript and Python code execution in Code nodes.
+    Note: This template enables critical environment variables to prevent future compatibility issues:
 
     - `N8N_RUNNERS_MODE=external`: Uses external task runner containers (recommended for production) instead of internal child processes.
 
@@ -83,7 +86,7 @@ spec:
     If you encounter any issues during deployment, please let me know via GitHub issues:
     [https://github.com/glasschan/seafoodholdhand-zeabur-templates](https://github.com/glasschan/seafoodholdhand-zeabur-templates)
   services:
-    - name: postgresql
+    - name: PostgreSQL
       icon: https://raw.githubusercontent.com/zeabur/service-icons/main/marketplace/postgresql.svg
       template: PREBUILT_V2
       spec:
@@ -178,9 +181,13 @@ spec:
               default_text_search_config = 'pg_catalog.english'
             permission: null
             envsubst: null
-    - name: n8n-main
+    - name: N8N
       icon: https://i.imgur.com/KUcP61Z.png
       template: PREBUILT_V2
+      domainKey: PUBLIC_DOMAIN
+      dependencies:
+        - PostgreSQL
+        - Redis
       spec:
         source:
           image: n8nio/n8n:stable
@@ -203,9 +210,6 @@ spec:
             title: N8N RUNNERS AUTH TOKEN
             content: ${N8N_RUNNERS_AUTH_TOKEN}
             category: Credentials
-        dependencies:
-          - postgresql
-          - Redis
         env:
           DB_POSTGRESDB_DATABASE:
             default: ${POSTGRES_DB}
@@ -251,9 +255,6 @@ spec:
             expose: false
           WEBHOOK_URL:
             default: ${ZEABUR_WEB_URL}
-            expose: false
-          N8N_RUNNERS_ENABLED:
-            default: "true"
             expose: false
           OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS:
             default: "true"
@@ -326,9 +327,13 @@ spec:
             default: ${REDIS_CONNECTION_STRING}
             expose: true
         configs: []
-    - name: n8n-worker
+    - name: Worker
       icon: https://i.imgur.com/KUcP61Z.png
       template: PREBUILT_V2
+      dependencies:
+        - N8N
+        - PostgreSQL
+        - Redis
       spec:
         source:
           image: n8nio/n8n:stable
@@ -344,8 +349,6 @@ spec:
         volumes:
           - id: data
             dir: /root/.n8n
-        dependencies:
-          - n8n-main
         env:
           DB_POSTGRESDB_DATABASE:
             default: ${POSTGRES_DB}
@@ -392,9 +395,6 @@ spec:
           WEBHOOK_URL:
             default: ${ZEABUR_WEB_URL}
             expose: false
-          N8N_RUNNERS_ENABLED:
-            default: "true"
-            expose: false
           OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS:
             default: "true"
             expose: false
@@ -408,20 +408,39 @@ spec:
             default: ${TASK_RUNNERS_AUTH_TOKEN}
             expose: false
         configs: []
-    - name: task-runners
+    - name: N8N-Runners
       icon: https://i.imgur.com/KUcP61Z.png
       template: PREBUILT_V2
+      dependencies:
+        - N8N
       spec:
         source:
           image: n8nio/runners:stable
-        dependencies:
-          - n8n-worker
         env:
           N8N_RUNNERS_AUTH_TOKEN:
             default: ${TASK_RUNNERS_AUTH_TOKEN}
             expose: false
           N8N_RUNNERS_TASK_BROKER_URI:
-            default: http://n8n-worker:5679
+            default: http://N8N:5679
+            expose: false
+          N8N_RUNNERS_AUTO_SHUTDOWN_TIMEOUT:
+            default: "15"
+            expose: false
+        configs: []
+    - name: Worker-Runners
+      icon: https://i.imgur.com/KUcP61Z.png
+      template: PREBUILT_V2
+      dependencies:
+        - Worker
+      spec:
+        source:
+          image: n8nio/runners:stable
+        env:
+          N8N_RUNNERS_AUTH_TOKEN:
+            default: ${TASK_RUNNERS_AUTH_TOKEN}
+            expose: false
+          N8N_RUNNERS_TASK_BROKER_URI:
+            default: http://Worker:5679
             expose: false
           N8N_RUNNERS_AUTO_SHUTDOWN_TIMEOUT:
             default: "15"
@@ -473,6 +492,11 @@ localization:
 
       ## 更新日誌
 
+      ### 2026-03-23
+      - 修正服務依賴項位置，符合 Zeabur 模板規範（從 `spec` 內部移至服務層級），確保正確的啟動順序
+      - 移除已棄用的 `N8N_RUNNERS_ENABLED` 環境變數（N8N v2 預設已啟用任務執行器）
+      - **修正任務執行器架構**：將單一 `Runners` 拆分為 `N8N-Runners`（連接 `http://N8N:5679`）和 `Worker-Runners`（連接 `http://Worker:5679`），符合官方 n8n docker-compose 架構，每個 n8n 實例配備獨立的 Runner
+
       ### 2025-12-28
       - **重要**：模板已更新以支援 N8N v2
       - 升級至外部任務執行器（生產環境推薦設置）
@@ -491,8 +515,6 @@ localization:
       ⚠️ 重要：如果您正在使用此模板的舊版本，請更新到此版本以避免可能的加密密鑰同步問題。
 
       注意：此模板啟用了關鍵的環境變數以防止未來的相容性問題：
-
-      - `N8N_RUNNERS_ENABLED=true`：啟用任務執行器以安全執行 Code 節點代碼。Code 節點中的 JavaScript 和 Python 代碼執行需要任務執行器。
 
       - `N8N_RUNNERS_MODE=external`：使用外部任務執行器容器（生產環境推薦）而非內部子進程。
 
@@ -548,6 +570,11 @@ localization:
 
       ## アップデート履歴
 
+      ### 2026-03-23
+      - サービス依存関係の配置を Zeabur テンプレートスキーマに準拠するよう修正（`spec` 内部からサービスレベルに移動）、正しい起動順序を確保
+      - 非推奨の `N8N_RUNNERS_ENABLED` 環境変数を削除（N8N v2 ではタスクランナーがデフォルトで有効）
+      - **タスクランナーアーキテクチャを修正**：単一の `Runners` を `N8N-Runners`（`http://N8N:5679` に接続）と `Worker-Runners`（`http://Worker:5679` に接続）に分割。公式 n8n docker-compose に準拠し、各 n8n インスタンスに専用の Runner を配備
+
       ### 2025-12-28
       - **重要**：テンプレートをN8N v2対応に更新
       - 外部タスクランナーにアップグレード（本番環境推奨設定）
@@ -566,8 +593,6 @@ localization:
       ⚠️ 重要：このテンプレートの以前のバージョンをご使用の場合は、暗号化キーの同期の問題を避けるため、このバージョンへの更新をお願いします。
 
       注：このテンプレートは、将来の互換性の問題を防ぐために、重要な環境変数を有効化しています：
-
-      - `N8N_RUNNERS_ENABLED=true`：Codeノードのコードを安全に実行するためにタスクランナーを有効にします。CodeノードでのJavaScriptおよびPythonコードの実行にはタスクランナーが必要です。
 
       - `N8N_RUNNERS_MODE=external`：内部子プロセスの代わりに外部タスクランナーコンテナを使用します（本番環境推奨）。
 
@@ -623,6 +648,11 @@ localization:
 
       ## 更新日志
 
+      ### 2026-03-23
+      - 修正服务依赖项位置，符合 Zeabur 模板规范（从 `spec` 内部移至服务层级），确保正确的启动顺序
+      - 移除已弃用的 `N8N_RUNNERS_ENABLED` 环境变量（N8N v2 默认已启用任务运行器）
+      - **修正任务运行器架构**：将单一 `Runners` 拆分为 `N8N-Runners`（连接 `http://N8N:5679`）和 `Worker-Runners`（连接 `http://Worker:5679`），符合官方 n8n docker-compose 架构，每个 n8n 实例配备独立的 Runner
+
       ### 2025-12-28
       - **重要**：模板已更新以支持 N8N v2
       - 升级到外部任务运行器（生产环境推荐设置）
@@ -641,8 +671,6 @@ localization:
       ⚠️ 重要：如果您正在使用此模板的旧版本，请更新到此版本以避免可能的加密密钥同步问题。
 
       注意：此模板启用了关键的环境变量以防止未来的兼容性问题：
-
-      - `N8N_RUNNERS_ENABLED=true`：启用任务运行器以安全执行 Code 节点代码。Code 节点中的 JavaScript 和 Python 代码执行需要任务运行器。
 
       - `N8N_RUNNERS_MODE=external`：使用外部任务运行器容器（生产环境推荐）而非内部子进程。
 
