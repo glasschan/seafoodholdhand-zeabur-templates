@@ -206,6 +206,9 @@ spec:
           FRONTEND_ORIGIN:
             default: https://${PUBLIC_DOMAIN}
             expose: false
+          CORS_ALLOWED_ORIGINS:
+            default: https://${PUBLIC_DOMAIN}
+            expose: false
           MULTICA_APP_URL:
             default: https://${PUBLIC_DOMAIN}
             expose: false
