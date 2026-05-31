@@ -24,10 +24,10 @@
 
 ## 登入方式
 
-部署完成後，打開你的網域：
+部署完成後，打開你的網域。在登入頁面輸入你的郵箱，然後通過以下方式獲取驗證碼：
 
-- **推薦**：設定 `RESEND_API_KEY` 以通過郵件接收驗證碼
-- **無需郵件**：查看 Backend 服務日誌，搜索 `[DEV] Verification code for` 獲取驗證碼
+- **推薦**：設定 `RESEND_API_KEY` → 驗證碼會發送到你的郵箱
+- **沒有 Resend**：打開 Zeabur 控制台中的 **Backend** 服務日誌 → 搜索 `[DEV] Verification code for` → 複製 6 位驗證碼並貼到登入頁面
 
 ## 使用方法
 

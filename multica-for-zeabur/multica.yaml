@@ -49,10 +49,10 @@ spec:
 
     ## Login Setup
 
-    This template defaults to `APP_ENV=production`. To log in:
+    This template defaults to `APP_ENV=production`. To log in, enter your email on the login page, then get the verification code by one of these methods:
 
-    - **Recommended:** set `RESEND_API_KEY` during setup to receive real verification codes via email
-    - **Without email:** check the backend service logs for the generated verification code (look for `[DEV] Verification code for ...:`)
+    - **Recommended:** set `RESEND_API_KEY` during setup → verification code will be sent to your email
+    - **Without Resend:** open the **Backend** service logs in Zeabur Dashboard → search for `[DEV] Verification code for` → copy the 6-digit code and paste it on the login page
 
     ## After Deployment
 
@@ -269,10 +269,10 @@ localization:
 
       ## 登入設定
 
-      此模板預設 `APP_ENV=production`。登入方式：
+      此模板預設 `APP_ENV=production`。登入時在登入頁面輸入你的郵箱，然後通過以下方式獲取驗證碼：
 
-      - **推薦：** 在設定時配置 `RESEND_API_KEY`，通過郵件接收真正的驗證碼
-      - **無需郵件：** 查看後端服務日誌中的驗證碼（搜索 `[DEV] Verification code for ...:`）
+      - **推薦：** 在設定時配置 `RESEND_API_KEY` → 驗證碼會發送到你的郵箱
+      - **沒有 Resend：** 打開 Zeabur 控制台中的 **Backend** 服務日誌 → 搜索 `[DEV] Verification code for` → 複製 6 位驗證碼並貼到登入頁面
 
       ## 部署後
 
@@ -326,10 +326,10 @@ localization:
 
       ## ログイン設定
 
-      このテンプレートはデフォルトで `APP_ENV=production` です。ログイン方法：
+      このテンプレートはデフォルトで `APP_ENV=production` です。ログインページでメールアドレスを入力し、以下のいずれかの方法で確認コードを取得してください：
 
-      - **推奨：** セットアップ時に `RESEND_API_KEY` を設定し、メールで実際の確認コードを受信
-      - **メールなし：** バックエンドサービスのログで生成された確認コードを確認（`[DEV] Verification code for ...:` を検索）
+      - **推奨：** セットアップ時に `RESEND_API_KEY` を設定 → 確認コードがメールに送信されます
+      - **Resend なし：** Zeabur ダッシュボードで **Backend** サービスのログを開く → `[DEV] Verification code for` を検索 → 6桁のコードをコピーしてログインページに貼り付け
 
       ## デプロイ後
 
