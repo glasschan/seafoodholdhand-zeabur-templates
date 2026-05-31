@@ -4,7 +4,7 @@ metadata:
   name: Multica
 spec:
   description: Open-source managed agents platform — turn coding agents into real teammates
-  icon: https://raw.githubusercontent.com/multica-ai/multica/main/docs/assets/logo-light.svg
+  icon: https://raw.githubusercontent.com/multica-ai/multica/main/docs/assets/logo-dark.svg
   coverImage: https://raw.githubusercontent.com/multica-ai/multica/main/docs/assets/banner.jpg
   variables:
     - key: PUBLIC_DOMAIN
@@ -159,7 +159,7 @@ spec:
               lc_time = 'en_US.utf8'
               default_text_search_config = 'pg_catalog.english'
     - name: backend
-      icon: https://raw.githubusercontent.com/multica-ai/multica/main/docs/assets/logo-light.svg
+      icon: https://raw.githubusercontent.com/multica-ai/multica/main/docs/assets/logo-dark.svg
       template: PREBUILT_V2
       dependencies:
         - PostgreSQL
@@ -211,7 +211,7 @@ spec:
             expose: false
         configs: []
     - name: frontend
-      icon: https://raw.githubusercontent.com/multica-ai/multica/main/docs/assets/logo-light.svg
+      icon: https://raw.githubusercontent.com/multica-ai/multica/main/docs/assets/logo-dark.svg
       template: PREBUILT_V2
       domainKey: PUBLIC_DOMAIN
       dependencies:
