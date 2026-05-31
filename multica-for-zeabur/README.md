@@ -35,9 +35,13 @@
 2. 等待所有服務啟動完成（Backend 會自動執行資料庫遷移）
 3. 打開你的網域並登入
 4. 安裝 CLI：`brew install multica-ai/tap/multica`
-5. 配置並啟動 daemon：
+5. 配置並啟動 daemon（替換為你的實際域名）：
    ```bash
-   multica setup self-host --server-url https://<你的後端域名> --app-url https://<你的網域>
+   multica setup self-host --server-url https://your-multica-domain.zeabur.app --app-url https://your-multica-domain.zeabur.app
+   ```
+   自建部署使用自定義域名：
+   ```bash
+   multica setup self-host --server-url https://api.example.com --app-url https://app.example.com
    ```
 6. 開始使用 Multica 管理你的 AI 代理團隊！
 

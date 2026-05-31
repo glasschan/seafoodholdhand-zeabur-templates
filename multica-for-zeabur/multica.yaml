@@ -58,7 +58,14 @@ spec:
 
     1. Open your workspace in the web app
     2. Install the Multica CLI: `brew install multica-ai/tap/multica`
-    3. Configure the CLI: `multica setup self-host --server-url https://<backend-domain> --app-url https://<your-domain>`
+    3. Configure the CLI (replace with your actual domain):
+       ```bash
+       multica setup self-host --server-url https://your-multica-domain.zeabur.app --app-url https://your-multica-domain.zeabur.app
+       ```
+       For on-premise deployments with custom domains:
+       ```bash
+       multica setup self-host --server-url https://api.example.com --app-url https://app.example.com
+       ```
     4. Create an agent and start assigning tasks!
 
     Learn more: https://github.com/multica-ai/multica
@@ -278,7 +285,14 @@ localization:
 
       1. 在網頁應用中打開你的工作區
       2. 安裝 Multica CLI：`brew install multica-ai/tap/multica`
-      3. 配置 CLI：`multica setup self-host --server-url https://<後端域名> --app-url https://<你的域名>`
+      3. 配置 CLI（替換為你的實際域名）：
+         ```bash
+         multica setup self-host --server-url https://your-multica-domain.zeabur.app --app-url https://your-multica-domain.zeabur.app
+         ```
+         自建部署使用自定義域名：
+         ```bash
+         multica setup self-host --server-url https://api.example.com --app-url https://app.example.com
+         ```
       4. 創建代理並開始分配任務！
 
       了解更多：https://github.com/multica-ai/multica
@@ -335,7 +349,14 @@ localization:
 
       1. ウェブアプリでワークスペースを開く
       2. Multica CLI をインストール：`brew install multica-ai/tap/multica`
-      3. CLI を設定：`multica setup self-host --server-url https://<バックエンドドメイン> --app-url https://<あなたのドメイン>`
+      3. CLI を設定（実際のドメインに置き換えてください）：
+         ```bash
+         multica setup self-host --server-url https://your-multica-domain.zeabur.app --app-url https://your-multica-domain.zeabur.app
+         ```
+         オンプレミスでカスタムドメインを使用する場合：
+         ```bash
+         multica setup self-host --server-url https://api.example.com --app-url https://app.example.com
+         ```
       4. エージェントを作成してタスクの割り当てを開始！
 
       詳細：https://github.com/multica-ai/multica
