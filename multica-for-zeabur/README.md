@@ -1,62 +1,55 @@
-# Multica Template for Zeabur
+# Multica for Zeabur
 
-這是一個為 nocode 用戶設計的 Multica 模板，專為 Zeabur 平台部署而創建。
+One-click deploy [Multica](https://github.com/multica-ai/multica) on Zeabur.
 
-[![Deploy on Zeabur](https://zeabur.com/button.svg)](https://seafoodholdhand.com/recommends/zeabur-multica-template/)
+## Architecture
 
-## 模板連結
-[Zeabur Multica Template](https://seafoodholdhand.com/recommends/zeabur-multica-template/)
+```
+[Zeabur LB] → Caddy Gateway (:3000)
+                   ├─ /ws         → backend:8080
+                   ├─ /api/*      → backend:8080
+                   ├─ /auth/*     → backend:8080
+                   ├─ /uploads/*  → backend:8080
+                   └─ /*          → frontend:3000
+```
 
-## 特點
+4 services: PostgreSQL 17 (pgvector) → Backend (Go) → Frontend (Next.js) → Caddy Gateway
 
-- 開箱即用：模板已經按照邏輯編寫並經過測試，可以成功運行
-- 簡單易用：專為 nocode 用戶設計，無需編程經驗
-- 快速部署：一鍵部署到 Zeabur 平台
-- 包含全部三個服務：PostgreSQL 17 (pgvector) + Backend + Frontend
+## Deploy
 
-## 關於環境變數
+Test:
+```bash
+npx zeabur@latest template deploy -f multica.yaml
+```
 
-此模板包含以下可配置的環境變數：
+Publish to Zeabur Marketplace:
+```bash
+npx zeabur@latest template create -f multica.yaml
+```
 
-- `PUBLIC_DOMAIN`：你的 Multica 前端網域
-- `API_DOMAIN`：你的 Multica 後端 API 網域
-- `JWT_SECRET`：用於簽署 JWT 令牌的密鑰（自動生成）
-- `RESEND_API_KEY`：可選，用於郵件登入。留空則需從後端日誌獲取驗證碼
+## Why Caddy?
 
-## 登入方式
+Prebuilt frontend images can't bake runtime env vars like `NEXT_PUBLIC_WS_URL`. Caddy solves this by putting everything behind one domain — WebSocket, API, and web all share the same origin. No CORS issues, no cross-origin WebSocket problems.
 
-部署完成後，打開你的網域。在登入頁面輸入你的郵箱，然後通過以下方式獲取驗證碼：
+## Login
 
-- **推薦**：設定 `RESEND_API_KEY` → 驗證碼會發送到你的郵箱
-- **沒有 Resend**：打開 Zeabur 控制台中的 **Backend** 服務日誌 → 搜索 `[DEV] Verification code for` → 複製 6 位驗證碼並貼到登入頁面
+1. Enter your email on the login page
+2. Get verification code:
+   - **With Resend:** code sent to your email (set `RESEND_API_KEY`)
+   - **Without Resend:** check Backend service logs for `[DEV] Verification code for`
 
-## 使用方法
+## After Deployment
 
-1. [點擊這裡](https://seafoodholdhand.com/recommends/zeabur-multica-template/) 使用模版部署
-2. 等待所有服務啟動完成（Backend 會自動執行資料庫遷移）
-3. 打開你的網域並登入
-4. 安裝 CLI：`brew install multica-ai/tap/multica`
-5. 配置並啟動 daemon（替換為你的實際域名）：
-   ```bash
-   multica setup self-host --server-url https://your-api-domain.zeabur.app --app-url https://your-multica-domain.zeabur.app
-   ```
-   自建部署使用自定義域名：
-   ```bash
-   multica setup self-host --server-url https://api.example.com --app-url https://app.example.com
-   ```
-6. 開始使用 Multica 管理你的 AI 代理團隊！
+```bash
+# Install CLI
+brew install multica-ai/tap/multica
 
-## 關於作者
+# Configure — both URLs point to the same domain
+multica setup self-host \
+  --server-url https://your-multica-domain.zeabur.app \
+  --app-url https://your-multica-domain.zeabur.app
+```
 
-我是一個 nocode 的普通用家，請多多指教。有空來我網站看看 [SEAFOODHOLDHAND 史佛浩恒](https://seafoodholdhand.com)
+## Create by SEAFOODHOLDHAND
 
-## 反饋與改進
-
-如果你有任何建議或改進意見，歡迎在 GitHub 上提交 issue。雖然我不太懂 GitHub 的使用，但我會通過 AI 的幫助盡力更新和維護這個模板。
-
-如在 Deploy 時遇到任何問題，可以到 Github issue 告訴我，我會盡力解決：
-https://github.com/glasschan/seafoodholdhand-zeabur-templates
-
-## 許可證
-
-本項目採用 MIT 許可證 - 詳情請參閱 LICENSE 文件
+[seafoodholdhand.com](https://seafoodholdhand.com)

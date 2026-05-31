@@ -11,10 +11,6 @@ spec:
       type: DOMAIN
       name: Domain
       description: What is the domain you want for your Multica instance?
-    - key: API_DOMAIN
-      type: DOMAIN
-      name: API Domain
-      description: What is the domain you want for your Multica backend API?
     - key: JWT_SECRET
       type: PASSWORD
       name: JWT Secret
@@ -38,6 +34,7 @@ spec:
     - **Multica Backend** — Go API + WebSocket server
     - **Multica Frontend** — Next.js web application
     - **PostgreSQL 17 + pgvector** — database with vector extension
+    - **Caddy Gateway** — reverse proxy for unified access (API, WebSocket, and web)
 
     ## Features
 
@@ -62,13 +59,13 @@ spec:
 
     1. Open your workspace in the web app
     2. Install the Multica CLI: `brew install multica-ai/tap/multica`
-    3. Configure the CLI (replace with your actual domains):
+    3. Configure the CLI (replace with your actual domain):
        ```bash
-       multica setup self-host --server-url https://your-api-domain.zeabur.app --app-url https://your-multica-domain.zeabur.app
+       multica setup self-host --server-url https://your-multica-domain.zeabur.app --app-url https://your-multica-domain.zeabur.app
        ```
        For on-premise deployments with custom domains:
        ```bash
-       multica setup self-host --server-url https://api.example.com --app-url https://app.example.com
+       multica setup self-host --server-url https://app.example.com --app-url https://app.example.com
        ```
     4. Create an agent and start assigning tasks!
 
@@ -172,7 +169,6 @@ spec:
     - name: backend
       icon: https://raw.githubusercontent.com/multica-ai/multica/main/docs/assets/logo-dark.svg
       template: PREBUILT_V2
-      domainKey: API_DOMAIN
       dependencies:
         - PostgreSQL
       spec:
@@ -192,7 +188,7 @@ spec:
             category: Credentials
         env:
           DATABASE_URL:
-            default: postgres://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
+            default: postgres://${POSTGRES_USERNAME}:***@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
             expose: false
           PORT:
             default: "8080"
@@ -213,7 +209,7 @@ spec:
             default: https://${PUBLIC_DOMAIN}
             expose: false
           MULTICA_PUBLIC_URL:
-            default: https://${API_DOMAIN}
+            default: https://${PUBLIC_DOMAIN}
             expose: false
           ALLOW_SIGNUP:
             default: "true"
@@ -228,7 +224,6 @@ spec:
     - name: frontend
       icon: https://raw.githubusercontent.com/multica-ai/multica/main/docs/assets/logo-dark.svg
       template: PREBUILT_V2
-      domainKey: PUBLIC_DOMAIN
       dependencies:
         - backend
       spec:
@@ -243,15 +238,43 @@ spec:
             default: "0.0.0.0"
             expose: false
           REMOTE_API_URL:
-            default: https://${API_DOMAIN}
-            expose: false
-          NEXT_PUBLIC_API_URL:
-            default: https://${API_DOMAIN}
-            expose: false
-          NEXT_PUBLIC_WS_URL:
-            default: wss://${API_DOMAIN}/ws
+            default: http://backend:8080
             expose: false
         configs: []
+    - name: gateway
+      icon: https://raw.githubusercontent.com/multica-ai/multica/main/docs/assets/logo-dark.svg
+      template: PREBUILT_V2
+      domainKey: PUBLIC_DOMAIN
+      dependencies:
+        - frontend
+        - backend
+      spec:
+        source:
+          image: caddy:2-alpine
+        ports:
+          - id: proxy
+            port: 3000
+            type: HTTP
+        configs:
+          - path: /etc/caddy/Caddyfile
+            template: |-
+              :3000 {
+                  handle /ws {
+                      reverse_proxy backend:8080
+                  }
+                  handle /api/* {
+                      reverse_proxy backend:8080
+                  }
+                  handle /auth/* {
+                      reverse_proxy backend:8080
+                  }
+                  handle /uploads/* {
+                      reverse_proxy backend:8080
+                  }
+                  handle {
+                      reverse_proxy frontend:3000
+                  }
+              }
 localization:
   zh-TW:
     description: 開源託管代理平台 — 將編程代理變成真正的隊友
@@ -260,10 +283,6 @@ localization:
         type: DOMAIN
         name: 網域
         description: 你想將 Multica 綁在哪個網域上？
-      - key: API_DOMAIN
-        type: DOMAIN
-        name: API 網域
-        description: 你想將 Multica 後端 API 綁在哪個網域上？
       - key: JWT_SECRET
         type: PASSWORD
         name: JWT 密鑰
@@ -282,6 +301,7 @@ localization:
       - **Multica 後端** — Go API + WebSocket 伺服器
       - **Multica 前端** — Next.js 網頁應用
       - **PostgreSQL 17 + pgvector** — 帶向量擴展的資料庫
+      - **Caddy 閘道** — 反向代理，統一存取（API、WebSocket 和網頁）
 
       ## 功能特點
 
@@ -308,11 +328,11 @@ localization:
       2. 安裝 Multica CLI：`brew install multica-ai/tap/multica`
       3. 配置 CLI（替換為你的實際域名）：
          ```bash
-         multica setup self-host --server-url https://your-api-domain.zeabur.app --app-url https://your-multica-domain.zeabur.app
+         multica setup self-host --server-url https://your-multica-domain.zeabur.app --app-url https://your-multica-domain.zeabur.app
          ```
          自建部署使用自定義域名：
          ```bash
-         multica setup self-host --server-url https://api.example.com --app-url https://app.example.com
+         multica setup self-host --server-url https://app.example.com --app-url https://app.example.com
          ```
       4. 創建代理並開始分配任務！
 
@@ -328,10 +348,6 @@ localization:
         type: DOMAIN
         name: ドメイン
         description: Multica インスタンスに使用したいドメインは何ですか？
-      - key: API_DOMAIN
-        type: DOMAIN
-        name: API ドメイン
-        description: Multica バックエンド API に使用したいドメインは何ですか？
       - key: JWT_SECRET
         type: PASSWORD
         name: JWT シークレット
@@ -350,6 +366,7 @@ localization:
       - **Multica バックエンド** — Go API + WebSocket サーバー
       - **Multica フロントエンド** — Next.js ウェブアプリケーション
       - **PostgreSQL 17 + pgvector** — ベクトル拡張付きデータベース
+      - **Caddy ゲートウェイ** — リバースプロキシによる統一アクセス（API、WebSocket、ウェブ）
 
       ## 機能
 
@@ -376,11 +393,11 @@ localization:
       2. Multica CLI をインストール：`brew install multica-ai/tap/multica`
       3. CLI を設定（実際のドメインに置き換えてください）：
          ```bash
-         multica setup self-host --server-url https://your-api-domain.zeabur.app --app-url https://your-multica-domain.zeabur.app
+         multica setup self-host --server-url https://your-multica-domain.zeabur.app --app-url https://your-multica-domain.zeabur.app
          ```
          オンプレミスでカスタムドメインを使用する場合：
          ```bash
-         multica setup self-host --server-url https://api.example.com --app-url https://app.example.com
+         multica setup self-host --server-url https://app.example.com --app-url https://app.example.com
          ```
       4. エージェントを作成してタスクの割り当てを開始！
 
