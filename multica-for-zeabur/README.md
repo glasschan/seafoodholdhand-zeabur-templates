@@ -6,6 +6,8 @@ One-click deploy [Multica](https://github.com/multica-ai/multica) on Zeabur.
 
 ```
 [Zeabur LB] → Caddy Gateway (:3000)
+                   ├─ /health     → backend:8080
+                   ├─ /readyz     → backend:8080
                    ├─ /ws         → backend:8080
                    ├─ /api/*      → backend:8080
                    ├─ /auth/*     → backend:8080
