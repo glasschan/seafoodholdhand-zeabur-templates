@@ -180,7 +180,7 @@ spec:
             category: Credentials
         env:
           DATABASE_URL:
-            default: postgres://${POSTGRES_USER}:***@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
+            default: postgres://${POSTGRES_USERNAME}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
             expose: false
           PORT:
             default: "8080"
