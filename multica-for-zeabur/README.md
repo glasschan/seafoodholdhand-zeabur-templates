@@ -2,6 +2,8 @@
 
 One-click deploy [Multica](https://github.com/multica-ai/multica) on Zeabur.
 
+[**Deploy to Zeabur →**](https://seafoodholdhand.com/recommends/zeabur-multica/)
+
 ## Architecture
 
 ```
