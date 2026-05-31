@@ -1,0 +1,344 @@
+apiVersion: zeabur.com/v1
+kind: Template
+metadata:
+  name: Multica
+spec:
+  description: Open-source managed agents platform — turn coding agents into real teammates
+  icon: https://raw.githubusercontent.com/multica-ai/multica/main/docs/assets/logo-light.svg
+  coverImage: https://raw.githubusercontent.com/multica-ai/multica/main/docs/assets/banner.jpg
+  variables:
+    - key: PUBLIC_DOMAIN
+      type: DOMAIN
+      name: Domain
+      description: What is the domain you want for your Multica instance?
+    - key: JWT_SECRET
+      type: PASSWORD
+      name: JWT Secret
+      description: Secret key for signing JWT tokens (auto-generated if empty)
+    - key: RESEND_API_KEY
+      type: STRING
+      name: Resend API Key
+      description: Optional — for email-based login. Leave empty to get verification codes from backend logs.
+  tags:
+    - AI
+    - Agents
+    - Productivity
+    - Automation
+  readme: |-
+    # Multica — Managed Agents Platform (create by SEAFOODHOLDHAND)
+
+    **Multica** turns coding agents into real teammates. Assign issues to an agent like you'd assign to a colleague — they'll pick up the work, write code, report blockers, and update statuses autonomously.
+
+    This template includes:
+
+    - **Multica Backend** — Go API + WebSocket server
+    - **Multica Frontend** — Next.js web application
+    - **PostgreSQL 17 + pgvector** — database with vector extension
+
+    ## Features
+
+    - **Agents as Teammates** — assign to an agent like you'd assign to a colleague
+    - **Squads** — group agents under a leader for stable routing
+    - **Autonomous Execution** — full task lifecycle with real-time progress via WebSocket
+    - **Autopilots** — schedule recurring work for agents (cron, webhooks, manual)
+    - **Reusable Skills** — every solution becomes a reusable skill for the team
+    - **Unified Runtimes** — one dashboard for all your compute
+    - **Multi-Workspace** — workspace-level isolation for different teams
+
+    Supports: Claude Code, Codex, GitHub Copilot CLI, OpenClaw, OpenCode, Hermes, Gemini, Pi, Cursor Agent, Kimi, Kiro CLI
+
+    ## Login Setup
+
+    This template defaults to `APP_ENV=production`. To log in:
+
+    - **Recommended:** set `RESEND_API_KEY` during setup to receive real verification codes via email
+    - **Without email:** check the backend service logs for the generated verification code (look for `[DEV] Verification code for ...:`)
+
+    ## After Deployment
+
+    1. Open your workspace in the web app
+    2. Install the Multica CLI: `brew install multica-ai/tap/multica`
+    3. Configure the CLI: `multica setup self-host --server-url https://<backend-domain> --app-url https://<your-domain>`
+    4. Create an agent and start assigning tasks!
+
+    Learn more: https://github.com/multica-ai/multica
+
+    If you encounter any issues during deployment, please let me know via GitHub issues:
+    [https://github.com/glasschan/seafoodholdhand-zeabur-templates](https://github.com/glasschan/seafoodholdhand-zeabur-templates)
+  services:
+    - name: PostgreSQL
+      icon: https://raw.githubusercontent.com/zeabur/service-icons/main/marketplace/postgresql.svg
+      template: PREBUILT_V2
+      spec:
+        source:
+          image: pgvector/pgvector:pg17
+          command:
+            - docker-entrypoint.sh
+            - -c
+            - config_file=/etc/postgresql/postgresql.conf
+        ports:
+          - id: database
+            port: 5432
+            type: TCP
+        volumes:
+          - id: data
+            dir: /var/lib/postgresql/data
+        instructions:
+          - type: TEXT
+            title: Connection String
+            content: postgresql://${POSTGRES_USERNAME}:***@${PORT_FORWARDED_HOSTNAME}:${DATABASE_PORT_FORWARDED_PORT}/${POSTGRES_DATABASE}
+          - type: TEXT
+            title: PostgreSQL Connect Command
+            content: psql "postgresql://${POSTGRES_USERNAME}:***@${PORT_FORWARDED_HOSTNAME}:${DATABASE_PORT_FORWARDED_PORT}/${POSTGRES_DATABASE}"
+          - type: TEXT
+            title: PostgreSQL username
+            content: ${POSTGRES_USERNAME}
+            category: Credentials
+          - type: PASSWORD
+            title: PostgreSQL password
+            content: ${POSTGRES_PASSWORD}
+            category: Credentials
+          - type: TEXT
+            title: PostgreSQL database
+            content: ${POSTGRES_DATABASE}
+            category: Credentials
+          - type: TEXT
+            title: PostgreSQL host
+            content: ${PORT_FORWARDED_HOSTNAME}
+            category: Hostname & Port
+          - type: TEXT
+            title: PostgreSQL port
+            content: ${DATABASE_PORT_FORWARDED_PORT}
+            category: Hostname & Port
+        env:
+          PGDATA:
+            default: /var/lib/postgresql/data/pgdata
+            expose: false
+          POSTGRES_CONNECTION_STRING:
+            default: postgresql://${POSTGRES_USERNAME}:***@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}
+            expose: false
+          POSTGRES_DATABASE:
+            default: ${POSTGRES_DB}
+            expose: true
+          POSTGRES_DB:
+            default: multica
+            expose: true
+          POSTGRES_HOST:
+            default: ${CONTAINER_HOSTNAME}
+            expose: true
+          POSTGRES_PASSWORD:
+            default: ${PASSWORD}
+            expose: true
+          POSTGRES_PORT:
+            default: ${DATABASE_PORT}
+            expose: true
+          POSTGRES_URI:
+            default: ${POSTGRES_CONNECTION_STRING}
+            expose: true
+          POSTGRES_USER:
+            default: multica
+            expose: false
+          POSTGRES_USERNAME:
+            default: ${POSTGRES_USER}
+            expose: true
+        configs:
+          - path: /etc/postgresql/postgresql.conf
+            template: |-
+              listen_addresses = '*'
+              max_connections = 100
+              shared_buffers = 128MB
+              dynamic_shared_memory_type = posix
+              max_wal_size = 1GB
+              min_wal_size = 80MB
+              log_timezone = 'Etc/UTC'
+              datestyle = 'iso, mdy'
+              timezone = 'Etc/UTC'
+              lc_messages = 'en_US.utf8'
+              lc_monetary = 'en_US.utf8'
+              lc_numeric = 'en_US.utf8'
+              lc_time = 'en_US.utf8'
+              default_text_search_config = 'pg_catalog.english'
+    - name: backend
+      icon: https://raw.githubusercontent.com/multica-ai/multica/main/docs/assets/logo-light.svg
+      template: PREBUILT_V2
+      dependencies:
+        - PostgreSQL
+      spec:
+        source:
+          image: ghcr.io/multica-ai/multica-backend:latest
+        ports:
+          - id: api
+            port: 8080
+            type: HTTP
+        volumes:
+          - id: uploads
+            dir: /app/data/uploads
+        instructions:
+          - type: PASSWORD
+            title: JWT Secret
+            content: ${JWT_SECRET}
+            category: Credentials
+        env:
+          DATABASE_URL:
+            default: postgres://${POSTGRES_USER}:***@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
+            expose: false
+          PORT:
+            default: "8080"
+            expose: false
+          JWT_SECRET:
+            default: ${JWT_SECRET}
+            expose: false
+          APP_ENV:
+            default: production
+            expose: false
+          FRONTEND_ORIGIN:
+            default: https://${PUBLIC_DOMAIN}
+            expose: false
+          MULTICA_APP_URL:
+            default: https://${PUBLIC_DOMAIN}
+            expose: false
+          MULTICA_PUBLIC_URL:
+            default: https://${PUBLIC_DOMAIN}
+            expose: false
+          ALLOW_SIGNUP:
+            default: "true"
+            expose: false
+          RESEND_API_KEY:
+            default: ${RESEND_API_KEY}
+            expose: false
+          RESEND_FROM_EMAIL:
+            default: noreply@multica.ai
+            expose: false
+        configs: []
+    - name: frontend
+      icon: https://raw.githubusercontent.com/multica-ai/multica/main/docs/assets/logo-light.svg
+      template: PREBUILT_V2
+      domainKey: PUBLIC_DOMAIN
+      dependencies:
+        - backend
+      spec:
+        source:
+          image: ghcr.io/multica-ai/multica-web:latest
+        ports:
+          - id: web
+            port: 3000
+            type: HTTP
+        env:
+          HOSTNAME:
+            default: "0.0.0.0"
+            expose: false
+        configs: []
+localization:
+  zh-TW:
+    description: 開源託管代理平台 — 將編程代理變成真正的隊友
+    variables:
+      - key: PUBLIC_DOMAIN
+        type: DOMAIN
+        name: 網域
+        description: 你想將 Multica 綁在哪個網域上？
+      - key: JWT_SECRET
+        type: PASSWORD
+        name: JWT 密鑰
+        description: 用於簽署 JWT 令牌的密鑰（若為空則自動生成）
+      - key: RESEND_API_KEY
+        type: STRING
+        name: Resend API 密鑰
+        description: 可選 — 用於郵件登入。留空則需從後端日誌獲取驗證碼。
+    readme: |-
+      # Multica — 託管代理平台 (create by SEAFOODHOLDHAND)
+
+      **Multica** 將編程代理變成真正的隊友。像分配任務給同事一樣分配任務給代理 — 它們會自動接手工作、編寫代碼、報告障礙並更新狀態。
+
+      此模板包含：
+
+      - **Multica 後端** — Go API + WebSocket 伺服器
+      - **Multica 前端** — Next.js 網頁應用
+      - **PostgreSQL 17 + pgvector** — 帶向量擴展的資料庫
+
+      ## 功能特點
+
+      - **代理即隊友** — 像分配任務給同事一樣分配給代理
+      - **小隊** — 在領導代理下分組代理，實現穩定路由
+      - **自主執行** — 通過 WebSocket 實時串流進度的完整任務生命週期
+      - **自動駕駛** — 為代理安排週期性工作（cron、webhook、手動）
+      - **可重用技能** — 每個解決方案都成為團隊可重用的技能
+      - **統一運行時** — 一個儀表板管理所有計算資源
+      - **多工作區** — 不同團隊的工作區級別隔離
+
+      支援：Claude Code、Codex、GitHub Copilot CLI、OpenClaw、OpenCode、Hermes、Gemini、Pi、Cursor Agent、Kimi、Kiro CLI
+
+      ## 登入設定
+
+      此模板預設 `APP_ENV=production`。登入方式：
+
+      - **推薦：** 在設定時配置 `RESEND_API_KEY`，通過郵件接收真正的驗證碼
+      - **無需郵件：** 查看後端服務日誌中的驗證碼（搜索 `[DEV] Verification code for ...:`）
+
+      ## 部署後
+
+      1. 在網頁應用中打開你的工作區
+      2. 安裝 Multica CLI：`brew install multica-ai/tap/multica`
+      3. 配置 CLI：`multica setup self-host --server-url https://<後端域名> --app-url https://<你的域名>`
+      4. 創建代理並開始分配任務！
+
+      了解更多：https://github.com/multica-ai/multica
+
+      如在 Deploy 時遇到任何問題，可以到 Github issue 告訴我：
+      [https://github.com/glasschan/seafoodholdhand-zeabur-templates](https://github.com/glasschan/seafoodholdhand-zeabur-templates)
+
+  ja-JP:
+    description: オープンソースのマネージドエージェントプラットフォーム — コーディングエージェントを本当のチームメイトに
+    variables:
+      - key: PUBLIC_DOMAIN
+        type: DOMAIN
+        name: ドメイン
+        description: Multica インスタンスに使用したいドメインは何ですか？
+      - key: JWT_SECRET
+        type: PASSWORD
+        name: JWT シークレット
+        description: JWT トークン署名用のシークレットキー（空の場合は自動生成）
+      - key: RESEND_API_KEY
+        type: STRING
+        name: Resend API キー
+        description: オプション — メールベースのログイン用。空の場合、バックエンドログから確認コードを取得。
+    readme: |-
+      # Multica — マネージドエージェントプラットフォーム (create by SEAFOODHOLDHAND)
+
+      **Multica** はコーディングエージェントを本当のチームメイトに変えます。同僚にタスクを割り当てるようにエージェントに問題を割り当てると、作業を引き受け、コードを書き、ブロッカーを報告し、ステータスを自律的に更新します。
+
+      このテンプレートには以下が含まれます：
+
+      - **Multica バックエンド** — Go API + WebSocket サーバー
+      - **Multica フロントエンド** — Next.js ウェブアプリケーション
+      - **PostgreSQL 17 + pgvector** — ベクトル拡張付きデータベース
+
+      ## 機能
+
+      - **エージェントはチームメイト** — 同僚のようにエージェントにタスクを割り当て
+      - **スクワッド** — リーダーエージェントの下にエージェントをグループ化し、安定したルーティングを実現
+      - **自律的実行** — WebSocket によるリアルタイム進捗ストリーミングで完全なタスクライフサイクルを管理
+      - **オートパイロット** — エージェントの定期的な作業をスケジュール（cron、webhook、手動）
+      - **再利用可能なスキル** — すべてのソリューションがチームの再利用可能なスキルに
+      - **統一ランタイム** — すべてのコンピュートリソースを1つのダッシュボードで管理
+      - **マルチワークスペース** — 異なるチームのワークスペースレベルの分離
+
+      サポート：Claude Code、Codex、GitHub Copilot CLI、OpenClaw、OpenCode、Hermes、Gemini、Pi、Cursor Agent、Kimi、Kiro CLI
+
+      ## ログイン設定
+
+      このテンプレートはデフォルトで `APP_ENV=production` です。ログイン方法：
+
+      - **推奨：** セットアップ時に `RESEND_API_KEY` を設定し、メールで実際の確認コードを受信
+      - **メールなし：** バックエンドサービスのログで生成された確認コードを確認（`[DEV] Verification code for ...:` を検索）
+
+      ## デプロイ後
+
+      1. ウェブアプリでワークスペースを開く
+      2. Multica CLI をインストール：`brew install multica-ai/tap/multica`
+      3. CLI を設定：`multica setup self-host --server-url https://<バックエンドドメイン> --app-url https://<あなたのドメイン>`
+      4. エージェントを作成してタスクの割り当てを開始！
+
+      詳細：https://github.com/multica-ai/multica
+
+      デプロイ中に問題が発生した場合は、Github issue で教えてください：
+      [https://github.com/glasschan/seafoodholdhand-zeabur-templates](https://github.com/glasschan/seafoodholdhand-zeabur-templates)
