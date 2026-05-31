@@ -18,7 +18,8 @@
 
 此模板包含以下可配置的環境變數：
 
-- `PUBLIC_DOMAIN`：你的 Multica 實例網域
+- `PUBLIC_DOMAIN`：你的 Multica 前端網域
+- `API_DOMAIN`：你的 Multica 後端 API 網域
 - `JWT_SECRET`：用於簽署 JWT 令牌的密鑰（自動生成）
 - `RESEND_API_KEY`：可選，用於郵件登入。留空則需從後端日誌獲取驗證碼
 
@@ -37,7 +38,7 @@
 4. 安裝 CLI：`brew install multica-ai/tap/multica`
 5. 配置並啟動 daemon（替換為你的實際域名）：
    ```bash
-   multica setup self-host --server-url https://your-multica-domain.zeabur.app --app-url https://your-multica-domain.zeabur.app
+   multica setup self-host --server-url https://your-api-domain.zeabur.app --app-url https://your-multica-domain.zeabur.app
    ```
    自建部署使用自定義域名：
    ```bash

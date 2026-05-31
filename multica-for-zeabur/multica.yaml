@@ -11,6 +11,10 @@ spec:
       type: DOMAIN
       name: Domain
       description: What is the domain you want for your Multica instance?
+    - key: API_DOMAIN
+      type: DOMAIN
+      name: API Domain
+      description: What is the domain you want for your Multica backend API?
     - key: JWT_SECRET
       type: PASSWORD
       name: JWT Secret
@@ -58,9 +62,9 @@ spec:
 
     1. Open your workspace in the web app
     2. Install the Multica CLI: `brew install multica-ai/tap/multica`
-    3. Configure the CLI (replace with your actual domain):
+    3. Configure the CLI (replace with your actual domains):
        ```bash
-       multica setup self-host --server-url https://your-multica-domain.zeabur.app --app-url https://your-multica-domain.zeabur.app
+       multica setup self-host --server-url https://your-api-domain.zeabur.app --app-url https://your-multica-domain.zeabur.app
        ```
        For on-premise deployments with custom domains:
        ```bash
@@ -168,6 +172,7 @@ spec:
     - name: backend
       icon: https://raw.githubusercontent.com/multica-ai/multica/main/docs/assets/logo-dark.svg
       template: PREBUILT_V2
+      domainKey: API_DOMAIN
       dependencies:
         - PostgreSQL
       spec:
@@ -205,7 +210,7 @@ spec:
             default: https://${PUBLIC_DOMAIN}
             expose: false
           MULTICA_PUBLIC_URL:
-            default: https://${PUBLIC_DOMAIN}
+            default: https://${API_DOMAIN}
             expose: false
           ALLOW_SIGNUP:
             default: "true"
@@ -243,6 +248,10 @@ localization:
         type: DOMAIN
         name: 網域
         description: 你想將 Multica 綁在哪個網域上？
+      - key: API_DOMAIN
+        type: DOMAIN
+        name: API 網域
+        description: 你想將 Multica 後端 API 綁在哪個網域上？
       - key: JWT_SECRET
         type: PASSWORD
         name: JWT 密鑰
@@ -287,7 +296,7 @@ localization:
       2. 安裝 Multica CLI：`brew install multica-ai/tap/multica`
       3. 配置 CLI（替換為你的實際域名）：
          ```bash
-         multica setup self-host --server-url https://your-multica-domain.zeabur.app --app-url https://your-multica-domain.zeabur.app
+         multica setup self-host --server-url https://your-api-domain.zeabur.app --app-url https://your-multica-domain.zeabur.app
          ```
          自建部署使用自定義域名：
          ```bash
@@ -307,6 +316,10 @@ localization:
         type: DOMAIN
         name: ドメイン
         description: Multica インスタンスに使用したいドメインは何ですか？
+      - key: API_DOMAIN
+        type: DOMAIN
+        name: API ドメイン
+        description: Multica バックエンド API に使用したいドメインは何ですか？
       - key: JWT_SECRET
         type: PASSWORD
         name: JWT シークレット
@@ -351,7 +364,7 @@ localization:
       2. Multica CLI をインストール：`brew install multica-ai/tap/multica`
       3. CLI を設定（実際のドメインに置き換えてください）：
          ```bash
-         multica setup self-host --server-url https://your-multica-domain.zeabur.app --app-url https://your-multica-domain.zeabur.app
+         multica setup self-host --server-url https://your-api-domain.zeabur.app --app-url https://your-multica-domain.zeabur.app
          ```
          オンプレミスでカスタムドメインを使用する場合：
          ```bash
