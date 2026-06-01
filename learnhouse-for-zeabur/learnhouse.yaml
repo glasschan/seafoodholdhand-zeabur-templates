@@ -14,11 +14,11 @@ spec:
     - key: ADMIN_EMAIL
       type: STRING
       name: Admin Email
-      description: Email address for the initial admin account
+      description: Email address for the initial admin account:
     - key: ADMIN_PASSWORD
       type: PASSWORD
       name: Admin Password
-      description: Password for the initial admin account
+      description: Password for the initial admin account:
   tags:
     - Education
     - LMS
@@ -80,7 +80,7 @@ spec:
 
     **Enable AI features:**
     - Set `LEARNHOUSE_IS_AI_ENABLED` to `True`
-    - Set `LEARNHOUSE_GEMINI_API_KEY` to your Gemini API key
+    - Set `LEARNHOUSE_OPENAI_API_KEY` to your OpenAI API key
 
     **Enable Google OAuth:**
     - Set `LEARNHOUSE_GOOGLE_CLIENT_ID` and `LEARNHOUSE_GOOGLE_CLIENT_SECRET`
@@ -161,7 +161,7 @@ spec:
 
         **啟用 AI 功能：**
         - 將 `LEARNHOUSE_IS_AI_ENABLED` 設為 `True`
-        - 將 `LEARNHOUSE_GEMINI_API_KEY` 設為你的 Gemini API 金鑰
+        - 將 `LEARNHOUSE_OPENAI_API_KEY` 設為你的 OpenAI API 金鑰
 
         **啟用 Google OAuth：**
         - 設定 `LEARNHOUSE_GOOGLE_CLIENT_ID` 和 `LEARNHOUSE_GOOGLE_CLIENT_SECRET`
@@ -235,7 +235,7 @@ spec:
     # ───────────────────────────────────────────────
     # LearnHouse App (Frontend + Backend + Collab)
     # ───────────────────────────────────────────────
-    - name: learnhouse
+    - name: Learnhouse
       icon: https://image.crisp.chat/avatar/website/dc95480a-4ebd-4bb3-b6eb-a3261d753eed/60/?1776431909281
       template: PREBUILT_V2
       domainKey: PUBLIC_DOMAIN
@@ -281,11 +281,6 @@ spec:
             expose: false
           NEXT_PUBLIC_LEARNHOUSE_HTTPS:
             default: "True"
-            expose: false
-
-          # ── Collab WebSocket ──
-          NEXT_PUBLIC_COLLAB_URL:
-            default: wss://${LEARNHOUSE_DOMAIN}/collab
             expose: false
 
           # ── NextAuth ──
