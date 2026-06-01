@@ -15,6 +15,10 @@ spec:
       type: STRING
       name: Admin Email
       description: Email address for the initial admin account
+    - key: ADMIN_PASSWORD
+      type: PASSWORD
+      name: Admin Password
+      description: Password for the initial admin account
   tags:
     - Education
     - LMS
@@ -104,6 +108,10 @@ spec:
           type: STRING
           name: 管理員電郵
           description: 初始管理員帳號的電子郵件
+        - key: ADMIN_PASSWORD
+          type: PASSWORD
+          name: 管理員密碼
+          description: 初始管理員帳號的密碼
       readme: |-
         # LearnHouse — 開源學習平台（由 SEAFOODHOLDHAND 建立）
 
@@ -249,21 +257,21 @@ spec:
 
           # ── Domain Config ──
           LEARNHOUSE_DOMAIN:
-            default: ${PUBLIC_DOMAIN}
+            default: ${ZEABUR_WEB_DOMAIN}
             expose: false
 
           # ── Frontend (NEXT_PUBLIC_* — injected at runtime via server-wrapper.js) ──
           NEXT_PUBLIC_LEARNHOUSE_API_URL:
-            default: https://${PUBLIC_DOMAIN}/api/v1/
+            default: https://${ZEABUR_WEB_DOMAIN}/api/v1/
             expose: false
           NEXT_PUBLIC_LEARNHOUSE_BACKEND_URL:
-            default: https://${PUBLIC_DOMAIN}/
+            default: https://${ZEABUR_WEB_DOMAIN}/
             expose: false
           NEXT_PUBLIC_LEARNHOUSE_DOMAIN:
-            default: ${PUBLIC_DOMAIN}
+            default: ${ZEABUR_WEB_DOMAIN}
             expose: false
           NEXT_PUBLIC_LEARNHOUSE_TOP_DOMAIN:
-            default: ${PUBLIC_DOMAIN}
+            default: ${ZEABUR_WEB_DOMAIN}
             expose: false
           NEXT_PUBLIC_LEARNHOUSE_MULTI_ORG:
             default: "False"
@@ -277,7 +285,7 @@ spec:
 
           # ── NextAuth ──
           NEXTAUTH_URL:
-            default: https://${PUBLIC_DOMAIN}
+            default: https://${ZEABUR_WEB_DOMAIN}
             expose: false
           NEXTAUTH_SECRET:
             default: ${PASSWORD}
@@ -301,7 +309,7 @@ spec:
             default: ${ADMIN_EMAIL}
             expose: false
           LEARNHOUSE_INITIAL_ADMIN_PASSWORD:
-            default: ${PASSWORD}
+            default: ${ADMIN_PASSWORD}
             expose: false
           LEARNHOUSE_INITIAL_ORG_NAME:
             default: My Organization
