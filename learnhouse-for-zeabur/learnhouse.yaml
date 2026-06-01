@@ -214,16 +214,16 @@ spec:
     # ───────────────────────────────────────────────
     # Redis
     # ───────────────────────────────────────────────
-    - name: Redis
-      icon: https://raw.githubusercontent.com/zeabur/service-icons/main/marketplace/redis.svg
+    - name: Valkey
+      icon: https://cdn.zeabur.com/valkey.svg
       template: PREBUILT_V2
       spec:
         source:
           image: valkey/valkey:9-alpine
-        command:
-          - valkey-server
-          - --appendonly
-          - "yes"
+          command:
+            - valkey-server
+            - --appendonly
+            - "yes"
         ports:
           - id: redis
             port: 6379
@@ -241,7 +241,7 @@ spec:
       domainKey: PUBLIC_DOMAIN
       dependencies:
         - PostgreSQL
-        - Redis
+        - Valkey
       spec:
         source:
           image: ghcr.io/learnhouse/app:latest
@@ -303,10 +303,10 @@ spec:
 
           # ── Backend: Redis ──
           LEARNHOUSE_REDIS_CONNECTION_STRING:
-            default: redis://redis:6379
+            default: redis://valkey:6379
             expose: false
           LEARNHOUSE_REDIS_URL:
-            default: redis://redis:6379
+            default: redis://valkey:6379
             expose: false
 
           # ── Backend: Initial Setup ──
