@@ -182,7 +182,7 @@ spec:
       template: PREBUILT_V2
       spec:
         source:
-          image: pgvector/pgvector:16
+          image: pgvector/pgvector:pg16
         ports:
           - id: database
             port: 5432
