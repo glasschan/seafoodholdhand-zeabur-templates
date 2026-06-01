@@ -11,26 +11,10 @@ spec:
       type: DOMAIN
       name: Domain
       description: Your LearnHouse domain (e.g., learnhouse.example.com)
-    - key: NEXTAUTH_SECRET
-      type: PASSWORD
-      name: NextAuth Secret
-      description: Secret key for NextAuth.js authentication (auto-generated)
     - key: ADMIN_EMAIL
       type: STRING
       name: Admin Email
       description: Email address for the initial admin account
-    - key: ADMIN_PASSWORD
-      type: PASSWORD
-      name: Admin Password
-      description: Password for the initial admin account (auto-generated)
-    - key: JWT_SECRET
-      type: PASSWORD
-      name: JWT Secret Key
-      description: Secret key for JWT tokens, shared by backend and collab server (auto-generated, 32+ chars)
-    - key: COLLAB_INTERNAL_KEY
-      type: PASSWORD
-      name: Collab Internal Key
-      description: Internal key for collab-to-backend communication (auto-generated)
   tags:
     - Education
     - LMS
@@ -82,8 +66,9 @@ spec:
 
     1. Open `https://your-domain.zeabur.app` in your browser
     2. Click **Sign In**
-    3. Log in with the admin email and password you configured during setup
-    4. Start creating your first course!
+    3. Log in with the admin email you configured and the auto-generated password
+    4. Find your password in Zeabur Dashboard → LearnHouse service → Environment Variables → `PASSWORD`
+    5. Start creating your first course!
 
     ## Post-Deployment Configuration (Optional)
 
@@ -123,18 +108,6 @@ spec:
           type: STRING
           name: 管理員電郵
           description: 初始管理員帳號的電子郵件
-        - key: ADMIN_PASSWORD
-          type: PASSWORD
-          name: 管理員密碼
-          description: 初始管理員帳號的密碼（自動產生）
-        - key: JWT_SECRET
-          type: PASSWORD
-          name: JWT 密鑰
-          description: JWT Token 密鑰，後端與協作伺服器共用（自動產生，至少 32 字元）
-        - key: COLLAB_INTERNAL_KEY
-          type: PASSWORD
-          name: 協作內部密鑰
-          description: 協作伺服器與後端通訊的內部密鑰（自動產生）
       readme: |-
         # LearnHouse — 開源學習平台（由 SEAFOODHOLDHAND 建立）
 
@@ -174,8 +147,9 @@ spec:
 
         1. 在瀏覽器開啟 `https://your-domain.zeabur.app`
         2. 點擊 **登入**
-        3. 使用設定期間配置的管理員電郵和密碼登入
-        4. 開始建立你的第一個課程！
+        3. 使用設定期間配置的管理員電郵和自動產生的密碼登入
+        4. 在 Zeabur 控制台 → LearnHouse 服務 → 環境變數 → `PASSWORD` 找到你的密碼
+        5. 開始建立你的第一個課程！
 
         ## 部署後配置（可選）
 
@@ -304,7 +278,7 @@ spec:
             default: https://${PUBLIC_DOMAIN}
             expose: false
           NEXTAUTH_SECRET:
-            default: ${NEXTAUTH_SECRET}
+            default: ${PASSWORD}
             expose: false
 
           # ── Backend: Database ──
@@ -325,7 +299,7 @@ spec:
             default: ${ADMIN_EMAIL}
             expose: false
           LEARNHOUSE_INITIAL_ADMIN_PASSWORD:
-            default: ${ADMIN_PASSWORD}
+            default: ${PASSWORD}
             expose: false
           LEARNHOUSE_INITIAL_ORG_NAME:
             default: My Organization
@@ -356,10 +330,10 @@ spec:
 
           # ── Backend: Security ──
           LEARNHOUSE_AUTH_JWT_SECRET_KEY:
-            default: ${JWT_SECRET}
+            default: ${PASSWORD}
             expose: false
 
           # ── Collab Server ──
           COLLAB_INTERNAL_KEY:
-            default: ${COLLAB_INTERNAL_KEY}
+            default: ${PASSWORD}
             expose: false
