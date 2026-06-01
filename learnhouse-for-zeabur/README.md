@@ -83,6 +83,7 @@ Customize these environment variables in the Zeabur Dashboard under the **learnh
 - Content uploads are stored in the container filesystem by default (`LEARNHOUSE_CONTENT_DELIVERY_TYPE=filesystem`). For production use with persistent storage, consider switching to S3-compatible storage.
 - The collaboration server uses WebSocket via the `/collab` path. Zeabur's load balancer supports WebSocket upgrades, so real-time collaboration (boards, live editing) works out of the box.
 - PostgreSQL uses `pgvector/pgvector:pg16` (not standard PostgreSQL) because LearnHouse requires the `vector` extension for AI features.
+- Redis is replaced with **Valkey** (BSD-3 licensed, fully Redis-compatible). The internal DNS hostname is `valkey`, so Redis connection strings use `redis://valkey:6379`.
 
 ---
 
