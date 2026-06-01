@@ -11,10 +11,6 @@ spec:
       type: DOMAIN
       name: Domain
       description: What is the domain you want for your Multica instance?
-    - key: JWT_SECRET
-      type: PASSWORD
-      name: JWT Secret
-      description: Secret key for signing JWT tokens (auto-generated if empty)
     - key: RESEND_API_KEY
       type: STRING
       name: Resend API Key
@@ -184,7 +180,7 @@ spec:
         instructions:
           - type: PASSWORD
             title: JWT Secret
-            content: ${JWT_SECRET}
+            content: ${PASSWORD}
             category: Credentials
         env:
           DATABASE_URL:
@@ -194,7 +190,7 @@ spec:
             default: "8080"
             expose: false
           JWT_SECRET:
-            default: ${JWT_SECRET}
+            default: ${PASSWORD}
             expose: false
           APP_ENV:
             default: production
@@ -289,10 +285,6 @@ localization:
         type: DOMAIN
         name: 網域
         description: 你想將 Multica 綁在哪個網域上？
-      - key: JWT_SECRET
-        type: PASSWORD
-        name: JWT 密鑰
-        description: 用於簽署 JWT 令牌的密鑰（若為空則自動生成）
       - key: RESEND_API_KEY
         type: STRING
         name: Resend API 密鑰
@@ -354,10 +346,6 @@ localization:
         type: DOMAIN
         name: ドメイン
         description: Multica インスタンスに使用したいドメインは何ですか？
-      - key: JWT_SECRET
-        type: PASSWORD
-        name: JWT シークレット
-        description: JWT トークン署名用のシークレットキー（空の場合は自動生成）
       - key: RESEND_API_KEY
         type: STRING
         name: Resend API キー
