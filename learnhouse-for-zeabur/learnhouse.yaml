@@ -219,7 +219,7 @@ spec:
       template: PREBUILT_V2
       spec:
         source:
-          image: valkey/valkey:7-alpine
+          image: valkey/valkey:9-alpine
         command:
           - valkey-server
           - --appendonly
