@@ -278,6 +278,67 @@ spec:
                   }
               }
 localization:
+  zh-CN:
+    description: 开源托管代理平台 — 将编程代理变成真正的队友
+    variables:
+      - key: PUBLIC_DOMAIN
+        type: DOMAIN
+        name: 域名
+        description: 你想将 Multica 绑定到哪个域名上？
+      - key: RESEND_API_KEY
+        type: STRING
+        name: Resend API 密钥
+        description: 可选 — 用于邮箱登录。留空则需从后端日志获取验证码。
+    readme: |-
+      # Multica — 托管代理平台 (create by SEAFOODHOLDHAND)
+
+      **Multica** 将编程代理变成真正的队友。像给同事分配任务一样给代理分配工作 — 它们会自动接手、编写代码、报告障碍并更新状态。
+
+      此模板包含：
+
+      - **Multica 后端** — Go API + WebSocket 服务器
+      - **Multica 前端** — Next.js 网页应用
+      - **PostgreSQL 17 + pgvector** — 带向量扩展的数据库
+      - **Caddy 网关** — 反向代理，统一访问（API、WebSocket 和网页）
+
+      ## 功能特点
+
+      - **代理即队友** — 像给同事分配任务一样分配给代理
+      - **小队** — 在领导代理下分组代理，实现稳定路由
+      - **自主执行** — 通过 WebSocket 实时推送进度的完整任务生命周期
+      - **自动驾驶** — 为代理安排周期性工作（cron、webhook、手动）
+      - **可复用技能** — 每个解决方案都成为团队可复用的技能
+      - **统一运行时** — 一个仪表盘管理所有计算资源
+      - **多工作区** — 不同团队的工作区级别隔离
+
+      支持：Claude Code、Codex、GitHub Copilot CLI、OpenClaw、OpenCode、Hermes、Gemini、Pi、Cursor Agent、Kimi、Kiro CLI
+
+      ## 登录设置
+
+      此模板默认 `APP_ENV=production`。登录时在登录页面输入你的邮箱，然后通过以下方式获取验证码：
+
+      - **推荐：** 在设置时配置 `RESEND_API_KEY` → 验证码会发送到你的邮箱
+      - **没有 Resend：** 打开 Zeabur 控制台中的 **Backend** 服务日志 → 搜索 `[DEV] Verification code for` → 复制 6 位验证码并粘贴到登录页面
+
+      ## 部署后
+
+      1. 在网页应用中打开你的工作区
+      2. 安装 Multica CLI：`brew install multica-ai/tap/multica`
+      3. 配置 CLI（替换为你的实际域名）：
+         ```bash
+         multica setup self-host --server-url https://your-multica-domain.zeabur.app --app-url https://your-multica-domain.zeabur.app
+         ```
+         自建部署使用自定义域名：
+         ```bash
+         multica setup self-host --server-url https://app.example.com --app-url https://app.example.com
+         ```
+      4. 创建代理并开始分配任务！
+
+      了解更多：https://github.com/multica-ai/multica
+
+      如在部署时遇到任何问题，可以通过 GitHub Issues 反馈：
+      [https://github.com/glasschan/seafoodholdhand-zeabur-templates](https://github.com/glasschan/seafoodholdhand-zeabur-templates)
+
   zh-TW:
     description: 開源託管代理平台 — 將編程代理變成真正的隊友
     variables:
@@ -398,4 +459,126 @@ localization:
       詳細：https://github.com/multica-ai/multica
 
       デプロイ中に問題が発生した場合は、Github issue で教えてください：
+      [https://github.com/glasschan/seafoodholdhand-zeabur-templates](https://github.com/glasschan/seafoodholdhand-zeabur-templates)
+
+  id-ID:
+    description: "Platform agen terkelola sumber terbuka — ubah agen coding menjadi rekan tim yang sesungguhnya"
+    variables:
+      - key: PUBLIC_DOMAIN
+        type: DOMAIN
+        name: Domain
+        description: Domain apa yang ingin Anda gunakan untuk instansi Multica Anda?
+      - key: RESEND_API_KEY
+        type: STRING
+        name: Kunci API Resend
+        description: Opsional — untuk login berbasis email. Biarkan kosong untuk mendapatkan kode verifikasi dari log backend.
+    readme: |-
+      # Multica — Platform Agen Terkelola (create by SEAFOODHOLDHAND)
+
+      **Multica** mengubah agen coding menjadi rekan tim yang sesungguhnya. Serahkan tugas ke agen seperti Anda menyerahkan ke rekan kerja — mereka akan mengambil pekerjaan, menulis kode, melaporkan hambatan, dan memperbarui status secara mandiri.
+
+      Template ini mencakup:
+
+      - **Backend Multica** — Go API + server WebSocket
+      - **Frontend Multica** — Aplikasi web Next.js
+      - **PostgreSQL 17 + pgvector** — Database dengan ekstensi vektor
+      - **Gateway Caddy** — Reverse proxy untuk akses terpadu (API, WebSocket, dan web)
+
+      ## Fitur
+
+      - **Agen sebagai Rekan Tim** — serahkan tugas ke agen seperti menyerahkan ke rekan kerja
+      - **Skuad** — kelompokkan agen di bawah agen pemimpin untuk routing yang stabil
+      - **Eksekusi Mandiri** — siklus hidup tugas lengkap dengan progres real-time melalui WebSocket
+      - **Autopilot** — jadwalkan pekerjaan berulang untuk agen (cron, webhook, manual)
+      - **Keterampilan yang Dapat Digunakan Ulang** — setiap solusi menjadi keterampilan yang dapat digunakan ulang oleh tim
+      - **Runtime Terpadu** — satu dasbor untuk semua sumber daya komputasi Anda
+      - **Multi-Workspace** — isolasi tingkat workspace untuk tim yang berbeda
+
+      Didukung: Claude Code, Codex, GitHub Copilot CLI, OpenClaw, OpenCode, Hermes, Gemini, Pi, Cursor Agent, Kimi, Kiro CLI
+
+      ## Pengaturan Login
+
+      Template ini secara default menggunakan `APP_ENV=production`. Untuk login, masukkan email Anda di halaman login, lalu dapatkan kode verifikasi melalui salah satu cara berikut:
+
+      - **Direkomendasikan:** atur `RESEND_API_KEY` saat konfigurasi → kode verifikasi akan dikirim ke email Anda
+      - **Tanpa Resend:** buka log layanan **Backend** di Dasbor Zeabur → cari `[DEV] Verification code for` → salin kode 6 digit dan tempelkan di halaman login
+
+      ## Setelah Deployment
+
+      1. Buka workspace Anda di aplikasi web
+      2. Instal Multica CLI: `brew install multica-ai/tap/multica`
+      3. Konfigurasi CLI (ganti dengan domain aktual Anda):
+         ```bash
+         multica setup self-host --server-url https://your-multica-domain.zeabur.app --app-url https://your-multica-domain.zeabur.app
+         ```
+         Untuk deployment on-premise dengan domain kustom:
+         ```bash
+         multica setup self-host --server-url https://app.example.com --app-url https://app.example.com
+         ```
+      4. Buat agen dan mulai serahkan tugas!
+
+      Pelajari lebih lanjut: https://github.com/multica-ai/multica
+
+      Jika Anda mengalami masalah selama deployment, silakan beritahu saya melalui GitHub issues:
+      [https://github.com/glasschan/seafoodholdhand-zeabur-templates](https://github.com/glasschan/seafoodholdhand-zeabur-templates)
+
+  es-ES:
+    description: Plataforma de agentes gestionados de código abierto — convierte agentes de código en verdaderos compañeros de equipo
+    variables:
+      - key: PUBLIC_DOMAIN
+        type: DOMAIN
+        name: Dominio
+        description: "¿Qué dominio quieres usar para tu instancia de Multica?"
+      - key: RESEND_API_KEY
+        type: STRING
+        name: Clave API de Resend
+        description: Opcional — para inicio de sesión por correo electrónico. Déjalo vacío para obtener códigos de verificación desde los registros del backend.
+    readme: |-
+      # Multica — Plataforma de agentes gestionados (create by SEAFOODHOLDHAND)
+
+      **Multica** convierte los agentes de código en verdaderos compañeros de equipo. Asigna tareas a un agente como se las asignarías a un compañero — recogerán el trabajo, escribirán código, informarán de bloqueos y actualizarán estados de forma autónoma.
+
+      Esta plantilla incluye:
+
+      - **Backend de Multica** — API en Go + servidor WebSocket
+      - **Frontend de Multica** — Aplicación web Next.js
+      - **PostgreSQL 17 + pgvector** — Base de datos con extensión vectorial
+      - **Gateway Caddy** — Proxy inverso para acceso unificado (API, WebSocket y web)
+
+      ## Características
+
+      - **Agentes como compañeros** — asigna tareas a un agente como lo harías con un compañero
+      - **Escuadrones** — agrupa agentes bajo un líder para un enrutamiento estable
+      - **Ejecución autónoma** — ciclo de vida completo de tareas con progreso en tiempo real vía WebSocket
+      - **Autopiloto** — programa tareas recurrentes para los agentes (cron, webhooks, manual)
+      - **Habilidades reutilizables** — cada solución se convierte en una habilidad reutilizable para el equipo
+      - **Runtimes unificados** — un panel para todos tus recursos de cómputo
+      - **Multi-espacio de trabajo** — aislamiento a nivel de espacio de trabajo para diferentes equipos
+
+      Soporta: Claude Code, Codex, GitHub Copilot CLI, OpenClaw, OpenCode, Hermes, Gemini, Pi, Cursor Agent, Kimi, Kiro CLI
+
+      ## Configuración de inicio de sesión
+
+      Esta plantilla usa `APP_ENV=production` por defecto. Para iniciar sesión, ingresa tu correo electrónico en la página de login y obtén el código de verificación mediante uno de estos métodos:
+
+      - **Recomendado:** configura `RESEND_API_KEY` durante la instalación → el código de verificación se enviará a tu correo electrónico
+      - **Sin Resend:** abre los registros del servicio **Backend** en el panel de Zeabur → busca `[DEV] Verification code for` → copia el código de 6 dígitos y pégalo en la página de login
+
+      ## Después del despliegue
+
+      1. Abre tu espacio de trabajo en la aplicación web
+      2. Instala la CLI de Multica: `brew install multica-ai/tap/multica`
+      3. Configura la CLI (reemplaza con tu dominio real):
+         ```bash
+         multica setup self-host --server-url https://tu-dominio-multica.zeabur.app --app-url https://tu-dominio-multica.zeabur.app
+         ```
+         Para despliegues on-premise con dominios personalizados:
+         ```bash
+         multica setup self-host --server-url https://app.ejemplo.com --app-url https://app.ejemplo.com
+         ```
+      4. ¡Crea un agente y comienza a asignar tareas!
+
+      Más información: https://github.com/multica-ai/multica
+
+      Si encuentras algún problema durante el despliegue, avísame a través de GitHub issues:
       [https://github.com/glasschan/seafoodholdhand-zeabur-templates](https://github.com/glasschan/seafoodholdhand-zeabur-templates)
