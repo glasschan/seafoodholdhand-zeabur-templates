@@ -390,3 +390,311 @@ localization:
 
       如在部署期間遇到任何問題，請透過 GitHub issues 告知：
       [https://github.com/glasschan/seafoodholdhand-zeabur-templates](https://github.com/glasschan/seafoodholdhand-zeabur-templates)
+  zh-CN:
+    description: "开源学习平台 — 创建课程、管理学生，一站式 LMS 打造顶级教学体验。"
+    variables:
+      - key: PUBLIC_DOMAIN
+        type: DOMAIN
+        name: 域名
+        description: 你的 LearnHouse 域名（Zeabur 自动分配，可自定义）
+      - key: ADMIN_EMAIL
+        type: STRING
+        name: 管理员邮箱
+        description: 初始管理员账号的电子邮件地址
+      - key: ADMIN_PASSWORD
+        type: PASSWORD
+        name: 管理员密码
+        description: 初始管理员账号的密码
+    readme: |-
+      # LearnHouse — 开源学习平台（由 SEAFOODHOLDHAND 创建）
+
+      **LearnHouse** 是新一代开源学习平台，让任何人都能轻松提供顶级教学内容。此模板一键部署完整的 LearnHouse 实例。
+
+      此模板包含：
+
+      - **LearnHouse 应用** — 集成式容器，包含 Next.js 前端、FastAPI 后端和实时协作服务器
+      - **PostgreSQL 16** — 课程、用户和内容的数据库
+      - **Valkey 9** — 缓存和会话管理（开源 Redis 替代品）
+
+      ## 架构
+
+      ```
+      [Zeabur 负载均衡] → LearnHouse 应用 (:80，内部 nginx)
+                             ├─ /*           → Next.js 前端 (:8000)
+                             ├─ /api/v1/*    → FastAPI 后端 (:9000)
+                             ├─ /api/auth/*  → NextAuth（经前端 :8000）
+                             ├─ /collab      → 协作 WebSocket 服务器 (:4000)
+                             └─ /content/*   → 后端静态内容 (:9000)
+      ```
+
+      ## 功能
+
+      - **课程构建器** — 拖放式创建和组织课程
+      - **丰富内容** — 支持文字、视频、嵌入等
+      - **实时协作** — 实时编辑共同工作
+      - **多组织** — 一个实例支持多个组织
+      - **学生管理** — 邀请学生、追踪进度
+      - **AI 功能** — 可选的 AI 功能（集成 Gemini）
+      - **内容存储** — 文件系统或 S3 兼容存储
+      - **认证** — 邮箱/密码 + 可选 Google OAuth
+
+      ## 首次登录
+
+      1. 在浏览器打开 `https://your-domain.zeabur.app`
+      2. 点击 **登录**
+      3. 使用设置期间配置的管理员邮箱和密码登录
+      4. 开始创建你的第一个课程！
+
+      ## 部署后配置（可选）
+
+      你可以在 Zeabur 控制台的 **LearnHouse** 服务下自定义这些环境变量：
+
+      **启用 AI 功能：**
+      - 将 `LEARNHOUSE_IS_AI_ENABLED` 设为 `True`
+      - 将 `LEARNHOUSE_GEMINI_API_KEY` 设为你的 Gemini API 密钥
+
+      **启用 Google OAuth：**
+      - 设置 `LEARNHOUSE_GOOGLE_CLIENT_ID` 和 `LEARNHOUSE_GOOGLE_CLIENT_SECRET`
+
+      **使用 S3 存储内容：**
+      - 将 `LEARNHOUSE_CONTENT_DELIVERY_TYPE` 设为 `s3api`
+      - 设置 `LEARNHOUSE_S3_API_BUCKET_NAME` 和 `LEARNHOUSE_S3_API_ENDPOINT_URL`
+
+      **启用邮件发送：**
+      - 设置 `LEARNHOUSE_RESEND_API_KEY` 为你的 Resend API 密钥
+
+      了解更多：https://github.com/learnhouse/learnhouse
+
+      如在部署期间遇到任何问题，请通过 GitHub issues 告知：
+      [https://github.com/glasschan/seafoodholdhand-zeabur-templates](https://github.com/glasschan/seafoodholdhand-zeabur-templates)
+  ja-JP:
+    description: "オープンソース学習プラットフォーム — コースの作成、学生の管理、オールインワンLMSで世界クラスの教育コンテンツを届けます。"
+    variables:
+      - key: PUBLIC_DOMAIN
+        type: DOMAIN
+        name: ドメイン
+        description: LearnHouse の公開ドメイン（Zeabur が自動割り当て、カスタマイズ可能）
+      - key: ADMIN_EMAIL
+        type: STRING
+        name: 管理者メールアドレス
+        description: 初期管理者アカウントのメールアドレス
+      - key: ADMIN_PASSWORD
+        type: PASSWORD
+        name: 管理者パスワード
+        description: 初期管理者アカウントのパスワード
+    readme: |-
+      # LearnHouse — 次世代オープンソース学習プラットフォーム（SEAFOODHOLDHAND 作成）
+
+      **LearnHouse** は誰もが簡単にオンラインコースを作成・共有できる、次世代のオープンソース学習プラットフォームです。
+
+      このテンプレートには以下が含まれます：
+
+      - **LearnHouse アプリ** — Next.js フロントエンド + FastAPI バックエンド + リアルタイムコラボレーションサーバーのオールインワンコンテナ
+      - **PostgreSQL 16** — コース、ユーザー、コンテンツ用データベース（pgvector 拡張付き）
+      - **Valkey 9** — キャッシュとセッション管理（Redis 互換オープンソース代替）
+
+      ## アーキテクチャ
+
+      ```
+      [Zeabur LB] → LearnHouse アプリ (:80, 内部 nginx)
+                        ├─ /*           → Next.js フロントエンド (:8000)
+                        ├─ /api/v1/*    → FastAPI バックエンド (:9000)
+                        ├─ /api/auth/*  → NextAuth（フロントエンド経由 :8000）
+                        ├─ /collab      → コラボ WebSocket サーバー (:4000)
+                        └─ /content/*   → バックエンド静的コンテンツ (:9000)
+      ```
+
+      ## 主な機能
+
+      - **コースビルダー** — ドラッグ＆ドロップでコースを作成・整理
+      - **リッチコンテンツ** — テキスト、動画、埋め込みなどに対応
+      - **リアルタイム共同編集** — WebSocket でリアルタイムに共同作業
+      - **マルチ組織** — 1つのインスタンスで複数の組織を管理
+      - **学生管理** — 学生の招待、進捗追跡
+      - **AI 機能** — オプションの AI 機能（Gemini 統合）
+      - **コンテンツストレージ** — ファイルシステムまたは S3 互換ストレージ
+      - **認証** — メール/パスワード + オプションの Google OAuth
+
+      ## 初回ログイン
+
+      1. ブラウザで `https://your-domain.zeabur.app` を開く
+      2. **サインイン** をクリック
+      3. 設定した管理者メールアドレスとパスワードでログイン
+      4. 最初のコースを作成しよう！
+
+      ## デプロイ後の設定（オプション）
+
+      Zeabur ダッシュボードの **LearnHouse** サービスで環境変数をカスタマイズできます：
+
+      **AI 機能を有効にする：**
+      - `LEARNHOUSE_IS_AI_ENABLED` を `True` に設定
+      - `LEARNHOUSE_GEMINI_API_KEY` に Gemini API キーを設定
+
+      **Google OAuth を有効にする：**
+      - `LEARNHOUSE_GOOGLE_CLIENT_ID` と `LEARNHOUSE_GOOGLE_CLIENT_SECRET` を設定
+
+      **S3 ストレージを使用する：**
+      - `LEARNHOUSE_CONTENT_DELIVERY_TYPE` を `s3api` に設定
+      - `LEARNHOUSE_S3_API_BUCKET_NAME` と `LEARNHOUSE_S3_API_ENDPOINT_URL` を設定
+
+      **メール送信を有効にする：**
+      - `LEARNHOUSE_RESEND_API_KEY` に Resend API キーを設定
+
+      詳細：https://github.com/learnhouse/learnhouse
+
+      デプロイに関する問題がある場合は、GitHub issues でお知らせください：
+      [https://github.com/glasschan/seafoodholdhand-zeabur-templates](https://github.com/glasschan/seafoodholdhand-zeabur-templates)
+  id-ID:
+    description: "Platform pembelajaran sumber terbuka — buat kursus, kelola siswa, dan sampaikan konten pendidikan kelas dunia dengan LMS serba dalam satu."
+    variables:
+      - key: PUBLIC_DOMAIN
+        type: DOMAIN
+        name: Domain
+        description: Domain instance LearnHouse Anda (otomatis ditetapkan oleh Zeabur, dapat disesuaikan)
+      - key: ADMIN_EMAIL
+        type: STRING
+        name: Email Admin
+        description: Alamat email untuk akun administrator pertama
+      - key: ADMIN_PASSWORD
+        type: PASSWORD
+        name: Kata Sandi Admin
+        description: Kata sandi untuk akun administrator pertama
+    readme: |-
+      # LearnHouse — Platform Pembelajaran Sumber Terbuka (dibuat oleh SEAFOODHOLDHAND)
+
+      **LearnHouse** adalah platform pembelajaran sumber terbuka generasi berikutnya yang memudahkan siapa saja menyediakan konten pendidikan kelas dunia. Template ini menyebarkan instance LearnHouse lengkap dalam satu klik.
+
+      Template ini mencakup:
+
+      - **Aplikasi LearnHouse** — Kontainer serba dalam satu dengan frontend Next.js, backend FastAPI, dan server kolaborasi real-time
+      - **PostgreSQL 16** — Database untuk kursus, pengguna, dan konten (dengan ekstensi pgvector)
+      - **Valkey 9** — Caching dan manajemen sesi (alternatif Redis sumber terbuka)
+
+      ## Arsitektur
+
+      ```
+      [Zeabur LB] → Aplikasi LearnHouse (:80, nginx internal)
+                        ├─ /*           → Frontend Next.js (:8000)
+                        ├─ /api/v1/*    → Backend FastAPI (:9000)
+                        ├─ /api/auth/*  → NextAuth (melalui Frontend :8000)
+                        ├─ /collab      → Server WebSocket Kolaborasi (:4000)
+                        └─ /content/*   → Konten Statis Backend (:9000)
+      ```
+
+      ## Fitur
+
+      - **Pembuat Kursus** — Buat dan atur kursus dengan drag-and-drop
+      - **Konten Kaya** — Dukungan untuk teks, video, embed, dan lainnya
+      - **Kolaborasi Real-time** — Edit bersama secara langsung
+      - **Multi-Organisasi** — Satu instance mendukung banyak organisasi
+      - **Manajemen Siswa** — Undang siswa, lacak kemajuan
+      - **Fitur AI** — Fitur AI opsional (integrasi Gemini)
+      - **Penyimpanan Konten** — Filesystem atau penyimpanan kompatibel S3
+      - **Autentikasi** — Email/kata sandi + Google OAuth opsional
+
+      ## Login Pertama
+
+      1. Buka `https://your-domain.zeabur.app` di browser
+      2. Klik **Masuk**
+      3. Login dengan email dan kata sandi admin yang dikonfigurasi
+      4. Mulai buat kursus pertama Anda!
+
+      ## Konfigurasi Pasca-Deploy (Opsional)
+
+      Anda dapat menyesuaikan variabel lingkungan ini di Zeabur Dashboard pada layanan **LearnHouse**:
+
+      **Aktifkan fitur AI：**
+      - Setel `LEARNHOUSE_IS_AI_ENABLED` ke `True`
+      - Setel `LEARNHOUSE_GEMINI_API_KEY` ke kunci API Gemini Anda
+
+      **Aktifkan Google OAuth：**
+      - Setel `LEARNHOUSE_GOOGLE_CLIENT_ID` dan `LEARNHOUSE_GOOGLE_CLIENT_SECRET`
+
+      **Gunakan penyimpanan S3：**
+      - Setel `LEARNHOUSE_CONTENT_DELIVERY_TYPE` ke `s3api`
+      - Setel `LEARNHOUSE_S3_API_BUCKET_NAME` dan `LEARNHOUSE_S3_API_ENDPOINT_URL`
+
+      **Aktifkan pengiriman email：**
+      - Setel `LEARNHOUSE_RESEND_API_KEY` ke kunci API Resend Anda
+
+      Pelajari lebih lanjut：https://github.com/learnhouse/learnhouse
+
+      Jika mengalami masalah saat deployment, beri tahu melalui GitHub issues：
+      [https://github.com/glasschan/seafoodholdhand-zeabur-templates](https://github.com/glasschan/seafoodholdhand-zeabur-templates)
+  es-ES:
+    description: "Plataforma de aprendizaje de código abierto — crea cursos, gestiona estudiantes y ofrece contenido educativo de primer nivel con un LMS todo en uno."
+    variables:
+      - key: PUBLIC_DOMAIN
+        type: DOMAIN
+        name: Dominio
+        description: Dominio de tu instancia de LearnHouse (asignado automáticamente por Zeabur, personalizable)
+      - key: ADMIN_EMAIL
+        type: STRING
+        name: Correo del administrador
+        description: Correo electrónico para la cuenta de administrador inicial
+      - key: ADMIN_PASSWORD
+        type: PASSWORD
+        name: Contraseña del administrador
+        description: Contraseña para la cuenta de administrador inicial
+    readme: |-
+      # LearnHouse — Plataforma de aprendizaje de código abierto (creado por SEAFOODHOLDHAND)
+
+      **LearnHouse** es una plataforma de aprendizaje de código abierto de próxima generación que permite a cualquier persona ofrecer contenido educativo de primer nivel. Esta plantilla despliega una instancia completa de LearnHouse con un solo clic.
+
+      Esta plantilla incluye:
+
+      - **Aplicación LearnHouse** — Contenedor todo en uno con frontend Next.js, backend FastAPI y servidor de colaboración en tiempo real
+      - **PostgreSQL 16** — Base de datos para cursos, usuarios y contenido (con extensión pgvector)
+      - **Valkey 9** — Caché y gestión de sesiones (alternativa Redis de código abierto)
+
+      ## Arquitectura
+
+      ```
+      [Zeabur LB] → Aplicación LearnHouse (:80, nginx interno)
+                        ├─ /*           → Frontend Next.js (:8000)
+                        ├─ /api/v1/*    → Backend FastAPI (:9000)
+                        ├─ /api/auth/*  → NextAuth (a través del Frontend :8000)
+                        ├─ /collab      → Servidor WebSocket de Colaboración (:4000)
+                        └─ /content/*   → Contenido Estático del Backend (:9000)
+      ```
+
+      ## Funcionalidades
+
+      - **Constructor de cursos** — Crea y organiza cursos con arrastrar y soltar
+      - **Contenido enriquecido** — Soporte para texto, vídeo, incrustaciones y más
+      - **Colaboración en tiempo real** — Edición conjunta en vivo
+      - **Multi-organización** — Una instancia soporta múltiples organizaciones
+      - **Gestión de estudiantes** — Invita estudiantes, haz seguimiento del progreso
+      - **Funciones de IA** — Funciones de IA opcionales (integración con Gemini)
+      - **Almacenamiento de contenido** — Sistema de archivos o almacenamiento compatible con S3
+      - **Autenticación** — Email/contraseña + Google OAuth opcional
+
+      ## Primer inicio de sesión
+
+      1. Abre `https://your-domain.zeabur.app` en el navegador
+      2. Haz clic en **Iniciar sesión**
+      3. Inicia sesión con el correo y la contraseña de administrador configurados
+      4. ¡Comienza a crear tu primer curso!
+
+      ## Configuración post-despliegue (opcional)
+
+      Puedes personalizar estas variables de entorno en el panel de Zeabur bajo el servicio **LearnHouse**:
+
+      **Activar funciones de IA：**
+      - Establece `LEARNHOUSE_IS_AI_ENABLED` en `True`
+      - Establece `LEARNHOUSE_GEMINI_API_KEY` con tu clave API de Gemini
+
+      **Activar Google OAuth：**
+      - Establece `LEARNHOUSE_GOOGLE_CLIENT_ID` y `LEARNHOUSE_GOOGLE_CLIENT_SECRET`
+
+      **Usar almacenamiento S3：**
+      - Establece `LEARNHOUSE_CONTENT_DELIVERY_TYPE` en `s3api`
+      - Establece `LEARNHOUSE_S3_API_BUCKET_NAME` y `LEARNHOUSE_S3_API_ENDPOINT_URL`
+
+      **Activar envío de correos：**
+      - Establece `LEARNHOUSE_RESEND_API_KEY` con tu clave API de Resend
+
+      Más información：https://github.com/learnhouse/learnhouse
+
+      Si encuentras algún problema durante el despliegue, avísanos a través de GitHub issues：
+      [https://github.com/glasschan/seafoodholdhand-zeabur-templates](https://github.com/glasschan/seafoodholdhand-zeabur-templates)
