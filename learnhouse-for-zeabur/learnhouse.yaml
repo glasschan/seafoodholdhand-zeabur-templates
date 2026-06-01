@@ -283,6 +283,11 @@ spec:
             default: "True"
             expose: false
 
+          # ── Collab WebSocket ──
+          NEXT_PUBLIC_COLLAB_URL:
+            default: wss://${LEARNHOUSE_DOMAIN}/collab
+            expose: false
+
           # ── NextAuth ──
           NEXTAUTH_URL:
             default: https://${LEARNHOUSE_DOMAIN}
