@@ -14,11 +14,11 @@ spec:
     - key: ADMIN_EMAIL
       type: STRING
       name: Admin Email
-      description: Email address for the initial admin account:
+      description: Email address for the initial admin account
     - key: ADMIN_PASSWORD
       type: PASSWORD
       name: Admin Password
-      description: Password for the initial admin account:
+      description: Password for the initial admin account
   tags:
     - Education
     - LMS
@@ -281,6 +281,11 @@ spec:
             expose: false
           NEXT_PUBLIC_LEARNHOUSE_HTTPS:
             default: "True"
+            expose: false
+
+          # ── Collab WebSocket ──
+          NEXT_PUBLIC_COLLAB_URL:
+            default: wss://${LEARNHOUSE_DOMAIN}/collab
             expose: false
 
           # ── NextAuth ──
