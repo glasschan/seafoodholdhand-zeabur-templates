@@ -10,7 +10,7 @@ spec:
     - key: PUBLIC_DOMAIN
       type: DOMAIN
       name: Domain
-      description: Your LearnHouse domain (e.g., learnhouse.example.com)
+      description: Your LearnHouse domain (auto-assigned by Zeabur, customizable)
     - key: ADMIN_EMAIL
       type: STRING
       name: Admin Email
@@ -99,11 +99,7 @@ spec:
         - key: PUBLIC_DOMAIN
           type: DOMAIN
           name: 網域
-          description: 你的 LearnHouse 網域（例如 learnhouse.example.com）
-        - key: NEXTAUTH_SECRET
-          type: PASSWORD
-          name: NextAuth 密鑰
-          description: NextAuth.js 認證密鑰（自動產生）
+          description: 你的 LearnHouse 網域（Zeabur 自動分配，可自訂）
         - key: ADMIN_EMAIL
           type: STRING
           name: 管理員電郵
