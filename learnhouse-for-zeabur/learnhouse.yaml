@@ -182,7 +182,7 @@ spec:
       template: PREBUILT_V2
       spec:
         source:
-          image: postgres:16-alpine
+          image: pgvector/pgvector:16
         ports:
           - id: database
             port: 5432
