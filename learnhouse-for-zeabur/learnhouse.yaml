@@ -80,7 +80,7 @@ spec:
 
     **Enable AI features:**
     - Set `LEARNHOUSE_IS_AI_ENABLED` to `True`
-    - Set `LEARNHOUSE_OPENAI_API_KEY` to your OpenAI API key
+    - Set `LEARNHOUSE_GEMINI_API_KEY` to your Gemini API key
 
     **Enable Google OAuth:**
     - Set `LEARNHOUSE_GOOGLE_CLIENT_ID` and `LEARNHOUSE_GOOGLE_CLIENT_SECRET`
@@ -161,7 +161,7 @@ spec:
 
         **啟用 AI 功能：**
         - 將 `LEARNHOUSE_IS_AI_ENABLED` 設為 `True`
-        - 將 `LEARNHOUSE_OPENAI_API_KEY` 設為你的 OpenAI API 金鑰
+        - 將 `LEARNHOUSE_GEMINI_API_KEY` 設為你的 Gemini API 金鑰
 
         **啟用 Google OAuth：**
         - 設定 `LEARNHOUSE_GOOGLE_CLIENT_ID` 和 `LEARNHOUSE_GOOGLE_CLIENT_SECRET`
@@ -332,10 +332,48 @@ spec:
           LEARNHOUSE_IS_AI_ENABLED:
             default: "False"
             expose: false
+          LEARNHOUSE_GEMINI_API_KEY:
+            default: ""
+            expose: false
 
           # ── Content Storage ──
           LEARNHOUSE_CONTENT_DELIVERY_TYPE:
             default: filesystem
+            expose: false
+          LEARNHOUSE_S3_API_BUCKET_NAME:
+            default: ""
+            expose: false
+          LEARNHOUSE_S3_API_ENDPOINT_URL:
+            default: ""
+            expose: false
+
+          # ── Email (disabled by default) ──
+          LEARNHOUSE_EMAIL_PROVIDER:
+            default: ""
+            expose: false
+          LEARNHOUSE_SYSTEM_EMAIL_ADDRESS:
+            default: ""
+            expose: false
+          LEARNHOUSE_RESEND_API_KEY:
+            default: ""
+            expose: false
+
+          # ── Google OAuth (disabled by default) ──
+          LEARNHOUSE_GOOGLE_CLIENT_ID:
+            default: ""
+            expose: false
+          LEARNHOUSE_GOOGLE_CLIENT_SECRET:
+            default: ""
+            expose: false
+
+          # ── Unsplash Image Library (disabled by default) ──
+          NEXT_PUBLIC_UNSPLASH_ACCESS_KEY:
+            default: ""
+            expose: false
+
+          # ── Cookie Domain ──
+          LEARNHOUSE_COOKIE_DOMAIN:
+            default: ""
             expose: false
 
           # ── Internal API URL (SSR → backend directly, bypassing nginx) ──
