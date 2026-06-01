@@ -219,11 +219,11 @@ spec:
       template: PREBUILT_V2
       spec:
         source:
-          image: redis:7.2.3-alpine
-          command:
-            - redis-server
-            - --appendonly
-            - "yes"
+          image: valkey/valkey:7-alpine
+        command:
+          - valkey-server
+          - --appendonly
+          - "yes"
         ports:
           - id: redis
             port: 6379

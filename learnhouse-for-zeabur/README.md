@@ -20,7 +20,7 @@ One-click deploy [LearnHouse](https://github.com/learnhouse/learnhouse) on Zeabu
 | Service | Image | Purpose |
 |---------|-------|---------|
 | PostgreSQL 16 | `pgvector/pgvector:pg16` | Database for courses, users, content (with vector extension for AI) |
-| Redis 7.2 | `redis:7.2.3-alpine` | Caching and session management |
+| Redis 7.2 | `valkey/valkey:7-alpine` | Caching and session management (open-source Redis fork) |
 | LearnHouse App | `ghcr.io/learnhouse/app:latest` | All-in-one: frontend + backend + collab + nginx |
 
 ### Why No External Nginx?
