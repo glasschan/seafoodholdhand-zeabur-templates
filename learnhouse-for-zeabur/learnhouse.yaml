@@ -96,87 +96,6 @@ spec:
 
     If you encounter any issues during deployment, please let me know via GitHub issues:
     [https://github.com/glasschan/seafoodholdhand-zeabur-templates](https://github.com/glasschan/seafoodholdhand-zeabur-templates)
-  localization:
-    zh-TW:
-      description: "開源學習平台 — 建立課程、管理學生，一站式 LMS 打造頂級教學體驗。"
-      variables:
-        - key: PUBLIC_DOMAIN
-          type: DOMAIN
-          name: 網域
-          description: 你的 LearnHouse 網域（Zeabur 自動分配，可自訂）
-        - key: ADMIN_EMAIL
-          type: STRING
-          name: 管理員電郵
-          description: 初始管理員帳號的電子郵件
-        - key: ADMIN_PASSWORD
-          type: PASSWORD
-          name: 管理員密碼
-          description: 初始管理員帳號的密碼
-      readme: |-
-        # LearnHouse — 開源學習平台（由 SEAFOODHOLDHAND 建立）
-
-        **LearnHouse** 是新一代開源學習平台，讓任何人都能輕鬆提供頂級教學內容。此模板一鍵部署完整的 LearnHouse 實例。
-
-        此模板包含：
-
-        - **LearnHouse 應用** — 整合式容器，包含 Next.js 前端、FastAPI 後端和即時協作伺服器
-        - **PostgreSQL 16** — 課程、用戶和內容的資料庫
-        - **Redis** — 快取和會話管理
-
-        ## 架構
-
-        ```
-        [Zeabur 負載均衡] → LearnHouse 應用 (:80，內部 nginx)
-                               ├─ /*           → Next.js 前端 (:8000)
-                               ├─ /api/v1/*    → FastAPI 後端 (:9000)
-                               ├─ /api/auth/*  → NextAuth（經前端 :8000）
-                               ├─ /collab      → 協作 WebSocket 伺服器 (:4000)
-                               └─ /content/*   → 後端靜態內容 (:9000)
-        ```
-
-        ## 功能
-
-        - **課程建構器** — 拖放式建立和組織課程
-        - **豐富內容** — 支援文字、影片、嵌入等
-        - **即時協作** — 即時編輯共同工作
-        - **多組織** — 一個實例支援多個組織
-        - **學生管理** — 邀請學生、追蹤進度
-        - **AI 功能** — 可選的 AI 功能（整合 OpenAI）
-        - **內容儲存** — 檔案系統或 S3 相容儲存
-        - **認證** — 電郵/密碼 + 可選 Google OAuth
-
-        ## 首次登入
-
-        部署完成後（初始啟動可能需要 2-3 分鐘）：
-
-        1. 在瀏覽器開啟 `https://your-domain.zeabur.app`
-        2. 點擊 **登入**
-        3. 使用設定期間配置的管理員電郵和自動產生的密碼登入
-        4. 在 Zeabur 控制台 → LearnHouse 服務 → 環境變數 → `PASSWORD` 找到你的密碼
-        5. 開始建立你的第一個課程！
-
-        ## 部署後配置（可選）
-
-        你可以在 Zeabur 控制台的 **LearnHouse** 服務下自定義這些環境變數：
-
-        **啟用 AI 功能：**
-        - 將 `LEARNHOUSE_IS_AI_ENABLED` 設為 `True`
-        - 將 `LEARNHOUSE_OPENAI_API_KEY` 設為你的 OpenAI API 金鑰
-
-        **啟用 Google OAuth：**
-        - 設定 `LEARNHOUSE_GOOGLE_CLIENT_ID` 和 `LEARNHOUSE_GOOGLE_CLIENT_SECRET`
-
-        **使用 S3 儲存內容：**
-        - 將 `LEARNHOUSE_CONTENT_DELIVERY_TYPE` 設為 `s3api`
-        - 設定 `LEARNHOUSE_S3_API_BUCKET_NAME` 和 `LEARNHOUSE_S3_API_ENDPOINT_URL`
-
-        **啟用電郵發送：**
-        - 設定 `LEARNHOUSE_RESEND_API_KEY` 為你的 Resend API 金鑰
-
-        了解更多：https://github.com/learnhouse/learnhouse
-
-        如在部署期間遇到任何問題，請透過 GitHub issues 告知：
-        [https://github.com/glasschan/seafoodholdhand-zeabur-templates](https://github.com/glasschan/seafoodholdhand-zeabur-templates)
   services:
     # ───────────────────────────────────────────────
     # PostgreSQL Database
@@ -390,3 +309,84 @@ spec:
           COLLAB_INTERNAL_KEY:
             default: ${PASSWORD}
             expose: false
+
+localization:
+  zh-TW:
+    description: "開源學習平台 — 建立課程、管理學生，一站式 LMS 打造頂級教學體驗。"
+    variables:
+      - key: PUBLIC_DOMAIN
+        type: DOMAIN
+        name: 網域
+        description: 你的 LearnHouse 網域（Zeabur 自動分配，可自訂）
+      - key: ADMIN_EMAIL
+        type: STRING
+        name: 管理員電郵
+        description: 初始管理員帳號的電子郵件
+      - key: ADMIN_PASSWORD
+        type: PASSWORD
+        name: 管理員密碼
+        description: 初始管理員帳號的密碼
+    readme: |-
+      # LearnHouse — 開源學習平台（由 SEAFOODHOLDHAND 建立）
+
+      **LearnHouse** 是新一代開源學習平台，讓任何人都能輕鬆提供頂級教學內容。此模板一鍵部署完整的 LearnHouse 實例。
+
+      此模板包含：
+
+      - **LearnHouse 應用** — 整合式容器，包含 Next.js 前端、FastAPI 後端和即時協作伺服器
+      - **PostgreSQL 16** — 課程、用戶和內容的資料庫
+      - **Valkey 9** — 快取和會話管理（開源 Redis 替代品）
+
+      ## 架構
+
+      ```
+      [Zeabur 負載均衡] → LearnHouse 應用 (:80，內部 nginx)
+                             ├─ /*           → Next.js 前端 (:8000)
+                             ├─ /api/v1/*    → FastAPI 後端 (:9000)
+                             ├─ /api/auth/*  → NextAuth（經前端 :8000）
+                             ├─ /collab      → 協作 WebSocket 伺服器 (:4000)
+                             └─ /content/*   → 後端靜態內容 (:9000)
+      ```
+
+      ## 功能
+
+      - **課程建構器** — 拖放式建立和組織課程
+      - **豐富內容** — 支援文字、影片、嵌入等
+      - **即時協作** — 即時編輯共同工作
+      - **多組織** — 一個實例支援多個組織
+      - **學生管理** — 邀請學生、追蹤進度
+      - **AI 功能** — 可選的 AI 功能（整合 Gemini）
+      - **內容儲存** — 檔案系統或 S3 相容儲存
+      - **認證** — 電郵/密碼 + 可選 Google OAuth
+
+      ## 首次登入
+
+      部署完成後（初始啟動可能需要 2-3 分鐘）：
+
+      1. 在瀏覽器開啟 `https://your-domain.zeabur.app`
+      2. 點擊 **登入**
+      3. 使用設定期間配置的管理員電郵和密碼登入
+      4. 開始建立你的第一個課程！
+
+      ## 部署後配置（可選）
+
+      你可以在 Zeabur 控制台的 **LearnHouse** 服務下自定義這些環境變數：
+
+      **啟用 AI 功能：**
+      - 將 `LEARNHOUSE_IS_AI_ENABLED` 設為 `True`
+      - 將 `LEARNHOUSE_GEMINI_API_KEY` 設為你的 Gemini API 金鑰
+
+      **啟用 Google OAuth：**
+      - 設定 `LEARNHOUSE_GOOGLE_CLIENT_ID` 和 `LEARNHOUSE_GOOGLE_CLIENT_SECRET`
+
+      **使用 S3 儲存內容：**
+      - 將 `LEARNHOUSE_CONTENT_DELIVERY_TYPE` 設為 `s3api`
+      - 設定 `LEARNHOUSE_S3_API_BUCKET_NAME` 和 `LEARNHOUSE_S3_API_ENDPOINT_URL`
+
+      **啟用電郵發送：**
+      - 設定 `LEARNHOUSE_RESEND_API_KEY` 為你的 Resend API 金鑰
+
+      了解更多：https://github.com/learnhouse/learnhouse
+
+      如在部署期間遇到任何問題，請透過 GitHub issues 告知：
+      [https://github.com/glasschan/seafoodholdhand-zeabur-templates](https://github.com/glasschan/seafoodholdhand-zeabur-templates)
