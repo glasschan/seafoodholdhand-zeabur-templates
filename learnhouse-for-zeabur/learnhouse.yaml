@@ -262,16 +262,16 @@ spec:
 
           # ── Frontend (NEXT_PUBLIC_* — injected at runtime via server-wrapper.js) ──
           NEXT_PUBLIC_LEARNHOUSE_API_URL:
-            default: https://${ZEABUR_WEB_DOMAIN}/api/v1/
+            default: https://${LEARNHOUSE_DOMAIN}/api/v1/
             expose: false
           NEXT_PUBLIC_LEARNHOUSE_BACKEND_URL:
-            default: https://${ZEABUR_WEB_DOMAIN}/
+            default: https://${LEARNHOUSE_DOMAIN}/
             expose: false
           NEXT_PUBLIC_LEARNHOUSE_DOMAIN:
-            default: ${ZEABUR_WEB_DOMAIN}
+            default: ${LEARNHOUSE_DOMAIN}
             expose: false
           NEXT_PUBLIC_LEARNHOUSE_TOP_DOMAIN:
-            default: ${ZEABUR_WEB_DOMAIN}
+            default: ${LEARNHOUSE_DOMAIN}
             expose: false
           NEXT_PUBLIC_LEARNHOUSE_MULTI_ORG:
             default: "False"
@@ -285,7 +285,7 @@ spec:
 
           # ── NextAuth ──
           NEXTAUTH_URL:
-            default: https://${ZEABUR_WEB_DOMAIN}
+            default: https://${LEARNHOUSE_DOMAIN}
             expose: false
           NEXTAUTH_SECRET:
             default: ${PASSWORD}
