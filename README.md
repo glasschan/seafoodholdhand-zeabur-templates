@@ -9,6 +9,7 @@ One-click deploy templates for [Zeabur](https://seafoodholdhand.com/recommends/z
 | [Multica](./multica-for-zeabur/) | Open-source managed agents platform — turn coding agents into real teammates |
 | [n8n with Worker](./n8n-w-worker-for-zeabur/) | Workflow automation with dedicated worker nodes |
 | [LearnHouse](./learnhouse-for-zeabur/) | Open-source learning platform — courses, students, and content management |
+| [OneCLI](./onecli-for-zeabur/) | Open-source credential gateway and vault for AI agents |
 
 ## Create by SEAFOODHOLDHAND
 
