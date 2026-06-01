@@ -200,6 +200,12 @@ spec:
           POSTGRES_DB:
             default: learnhouse
             expose: true
+          POSTGRES_HOST:
+            default: ${CONTAINER_HOSTNAME}
+            expose: true
+          POSTGRES_PORT:
+            default: ${DATABASE_PORT}
+            expose: true
 
     # ───────────────────────────────────────────────
     # Redis
