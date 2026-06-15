@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://schema.zeabur.app/template.json
 apiVersion: zeabur.com/v1
 kind: Template
 metadata:
@@ -14,7 +15,11 @@ spec:
     - key: RESEND_API_KEY
       type: STRING
       name: Resend API Key
-      description: Optional — for email-based login. Leave empty to get verification codes from backend logs.
+      description: Your Resend (resend.com) API key for sending verification emails. Leave empty to get codes from backend logs instead.
+    - key: RESEND_FROM_EMAIL
+      type: STRING
+      name: Resend From Email
+      description: The verified sender email address from your Resend (resend.com) account, e.g. noreply@yourdomain.com.
   tags:
     - AI
     - Agents
@@ -48,8 +53,10 @@ spec:
 
     This template defaults to `APP_ENV=production`. To log in, enter your email on the login page, then get the verification code by one of these methods:
 
-    - **Recommended:** set `RESEND_API_KEY` during setup → verification code will be sent to your email
+    - **Recommended:** set `RESEND_API_KEY` (your Resend API key from resend.com) and `RESEND_FROM_EMAIL` (a verified sender email, e.g. noreply@yourdomain.com) during setup → verification code will be sent to your email
     - **Without Resend:** open the **Backend** service logs in Zeabur Dashboard → search for `[DEV] Verification code for` → copy the 6-digit code and paste it on the login page
+
+    > **URL not working?** The Gateway service uses `${ZEABUR_WEB_URL}` to auto-detect its public URL. If the login page or API fails to load after deployment, go to **Zeabur Dashboard → Gateway → Variables → APP_URL**, manually set it to your Multica domain (e.g. `https://your-multica.zeabur.app`), then restart the Gateway service.
 
     ## After Deployment
 
@@ -214,7 +221,7 @@ spec:
             default: ${RESEND_API_KEY}
             expose: false
           RESEND_FROM_EMAIL:
-            default: noreply@multica.ai
+            default: ${RESEND_FROM_EMAIL}
             expose: false
         configs: []
     - name: frontend
@@ -288,7 +295,11 @@ localization:
       - key: RESEND_API_KEY
         type: STRING
         name: Resend API 密钥
-        description: 可选 — 用于邮箱登录。留空则需从后端日志获取验证码。
+        description: 你的 Resend（resend.com）API 密钥，用于发送验证邮件。留空则需从后端日志获取验证码。
+      - key: RESEND_FROM_EMAIL
+        type: STRING
+        name: Resend 发件邮箱
+        description: 你在 Resend（resend.com）账户中验证的发件邮箱地址，如 noreply@yourdomain.com。
     readme: |-
       # Multica — 托管代理平台 (create by SEAFOODHOLDHAND)
 
@@ -317,8 +328,10 @@ localization:
 
       此模板默认 `APP_ENV=production`。登录时在登录页面输入你的邮箱，然后通过以下方式获取验证码：
 
-      - **推荐：** 在设置时配置 `RESEND_API_KEY` → 验证码会发送到你的邮箱
+      - **推荐：** 在设置时配置 `RESEND_API_KEY`（你的 Resend API 密钥，来自 resend.com）和 `RESEND_FROM_EMAIL`（已验证的发件邮箱，如 noreply@yourdomain.com）→ 验证码会发送到你的邮箱
       - **没有 Resend：** 打开 Zeabur 控制台中的 **Backend** 服务日志 → 搜索 `[DEV] Verification code for` → 复制 6 位验证码并粘贴到登录页面
+
+      > **URL 无法访问？** Gateway 服务使用 `${ZEABUR_WEB_URL}` 自动检测公共 URL。如果部署后登录页面或 API 无法加载，请前往 **Zeabur 控制台 → Gateway → Variables → APP_URL**，手动设置为你的 Multica 域名（如 `https://your-multica.zeabur.app`），然后重启 Gateway 服务。
 
       ## 部署后
 
@@ -349,7 +362,11 @@ localization:
       - key: RESEND_API_KEY
         type: STRING
         name: Resend API 密鑰
-        description: 可選 — 用於郵件登入。留空則需從後端日誌獲取驗證碼。
+        description: 你的 Resend（resend.com）API 密鑰，用於發送驗證郵件。留空則需從後端日誌獲取驗證碼。
+      - key: RESEND_FROM_EMAIL
+        type: STRING
+        name: Resend 發件郵箱
+        description: 你在 Resend（resend.com）帳戶中驗證的發件郵箱地址，如 noreply@yourdomain.com。
     readme: |-
       # Multica — 託管代理平台 (create by SEAFOODHOLDHAND)
 
@@ -378,8 +395,10 @@ localization:
 
       此模板預設 `APP_ENV=production`。登入時在登入頁面輸入你的郵箱，然後通過以下方式獲取驗證碼：
 
-      - **推薦：** 在設定時配置 `RESEND_API_KEY` → 驗證碼會發送到你的郵箱
+      - **推薦：** 在設定時配置 `RESEND_API_KEY`（你的 Resend API 密鑰，來自 resend.com）和 `RESEND_FROM_EMAIL`（已驗證的發件郵箱，如 noreply@yourdomain.com）→ 驗證碼會發送到你的郵箱
       - **沒有 Resend：** 打開 Zeabur 控制台中的 **Backend** 服務日誌 → 搜索 `[DEV] Verification code for` → 複製 6 位驗證碼並貼到登入頁面
+
+      > **URL 無法存取？** Gateway 服務使用 `${ZEABUR_WEB_URL}` 自動偵測公共 URL。如果部署後登入頁面或 API 無法載入，請前往 **Zeabur 控制台 → Gateway → Variables → APP_URL**，手動設定為你的 Multica 網域（如 `https://your-multica.zeabur.app`），然後重啟 Gateway 服務。
 
       ## 部署後
 
@@ -410,7 +429,11 @@ localization:
       - key: RESEND_API_KEY
         type: STRING
         name: Resend API キー
-        description: オプション — メールベースのログイン用。空の場合、バックエンドログから確認コードを取得。
+        description: 確認メール送信用の Resend（resend.com）API キー。空の場合はバックエンドログから確認コードを取得してください。
+      - key: RESEND_FROM_EMAIL
+        type: STRING
+        name: Resend 送信元メール
+        description: Resend（resend.com）アカウントで認証済みの送信元メールアドレス（例：noreply@yourdomain.com）。
     readme: |-
       # Multica — マネージドエージェントプラットフォーム (create by SEAFOODHOLDHAND)
 
@@ -439,8 +462,10 @@ localization:
 
       このテンプレートはデフォルトで `APP_ENV=production` です。ログインページでメールアドレスを入力し、以下のいずれかの方法で確認コードを取得してください：
 
-      - **推奨：** セットアップ時に `RESEND_API_KEY` を設定 → 確認コードがメールに送信されます
+      - **推奨：** セットアップ時に `RESEND_API_KEY`（resend.com の Resend API キー）と `RESEND_FROM_EMAIL`（認証済みの送信元メールアドレス、例：noreply@yourdomain.com）を設定 → 確認コードがメールに送信されます
       - **Resend なし：** Zeabur ダッシュボードで **Backend** サービスのログを開く → `[DEV] Verification code for` を検索 → 6桁のコードをコピーしてログインページに貼り付け
+
+      > **URL にアクセスできない？** Gateway サービスは `${ZEABUR_WEB_URL}` を使用して公開 URL を自動検出します。デプロイ後にログインページや API が読み込めない場合は、**Zeabur ダッシュボード → Gateway → Variables → APP_URL** に移動し、Multica ドメイン（例：`https://your-multica.zeabur.app`）を手動で設定してから、Gateway サービスを再起動してください。
 
       ## デプロイ後
 
@@ -471,7 +496,11 @@ localization:
       - key: RESEND_API_KEY
         type: STRING
         name: Kunci API Resend
-        description: Opsional — untuk login berbasis email. Biarkan kosong untuk mendapatkan kode verifikasi dari log backend.
+        description: Kunci API Resend (resend.com) Anda untuk mengirim email verifikasi. Biarkan kosong untuk mendapatkan kode dari log backend.
+      - key: RESEND_FROM_EMAIL
+        type: STRING
+        name: Email Pengirim Resend
+        description: Alamat email pengirim yang terverifikasi dari akun Resend (resend.com) Anda, mis. noreply@yourdomain.com.
     readme: |-
       # Multica — Platform Agen Terkelola (create by SEAFOODHOLDHAND)
 
@@ -500,8 +529,10 @@ localization:
 
       Template ini secara default menggunakan `APP_ENV=production`. Untuk login, masukkan email Anda di halaman login, lalu dapatkan kode verifikasi melalui salah satu cara berikut:
 
-      - **Direkomendasikan:** atur `RESEND_API_KEY` saat konfigurasi → kode verifikasi akan dikirim ke email Anda
+      - **Direkomendasikan:** atur `RESEND_API_KEY` (kunci API Resend Anda dari resend.com) dan `RESEND_FROM_EMAIL` (alamat email pengirim yang terverifikasi, mis. noreply@yourdomain.com) saat konfigurasi → kode verifikasi akan dikirim ke email Anda
       - **Tanpa Resend:** buka log layanan **Backend** di Dasbor Zeabur → cari `[DEV] Verification code for` → salin kode 6 digit dan tempelkan di halaman login
+
+      > **URL tidak dapat diakses?** Layanan Gateway menggunakan `${ZEABUR_WEB_URL}` untuk mendeteksi URL publik secara otomatis. Jika halaman login atau API tidak dapat dimuat setelah deployment, buka **Dasbor Zeabur → Gateway → Variables → APP_URL**, atur secara manual ke domain Multica Anda (mis. `https://your-multica.zeabur.app`), lalu mulai ulang layanan Gateway.
 
       ## Setelah Deployment
 
@@ -532,7 +563,11 @@ localization:
       - key: RESEND_API_KEY
         type: STRING
         name: Clave API de Resend
-        description: Opcional — para inicio de sesión por correo electrónico. Déjalo vacío para obtener códigos de verificación desde los registros del backend.
+        description: Tu clave de API de Resend (resend.com) para enviar correos de verificación. Déjalo vacío para obtener códigos de los logs del backend.
+      - key: RESEND_FROM_EMAIL
+        type: STRING
+        name: Email de Remitente Resend
+        description: La dirección de correo electrónico del remitente verificada de tu cuenta de Resend (resend.com), por ejemplo, noreply@tudominio.com.
     readme: |-
       # Multica — Plataforma de agentes gestionados (create by SEAFOODHOLDHAND)
 
@@ -561,8 +596,10 @@ localization:
 
       Esta plantilla usa `APP_ENV=production` por defecto. Para iniciar sesión, ingresa tu correo electrónico en la página de login y obtén el código de verificación mediante uno de estos métodos:
 
-      - **Recomendado:** configura `RESEND_API_KEY` durante la instalación → el código de verificación se enviará a tu correo electrónico
+      - **Recomendado:** configura `RESEND_API_KEY` (tu clave de API de Resend desde resend.com) y `RESEND_FROM_EMAIL` (tu dirección de correo electrónico del remitente verificada, por ejemplo, noreply@tudominio.com) durante la instalación → el código de verificación se enviará a tu correo electrónico
       - **Sin Resend:** abre los registros del servicio **Backend** en el panel de Zeabur → busca `[DEV] Verification code for` → copia el código de 6 dígitos y pégalo en la página de login
+
+      > **¿URL no accesible?** El servicio Gateway utiliza `${ZEABUR_WEB_URL}` para detectar automáticamente su URL pública. Si la página de login o la API no se cargan después del despliegue, ve a **Panel de Zeabur → Gateway → Variables → APP_URL**, configúralo manualmente con tu dominio de Multica (por ejemplo, `https://your-multica.zeabur.app`), y luego reinicia el servicio Gateway.
 
       ## Después del despliegue
 
