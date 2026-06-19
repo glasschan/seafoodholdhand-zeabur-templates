@@ -174,6 +174,7 @@ spec:
       template: PREBUILT_V2
       dependencies:
         - PostgreSQL
+        - gateway
       spec:
         source:
           image: ghcr.io/multica-ai/multica-backend:latest
@@ -203,16 +204,16 @@ spec:
             default: production
             expose: false
           FRONTEND_ORIGIN:
-            default: https://${PUBLIC_DOMAIN}
+            default: ${APP_URL}
             expose: false
           CORS_ALLOWED_ORIGINS:
-            default: https://${PUBLIC_DOMAIN}
+            default: ${APP_URL}
             expose: false
           MULTICA_APP_URL:
-            default: https://${PUBLIC_DOMAIN}
+            default: ${APP_URL}
             expose: false
           MULTICA_PUBLIC_URL:
-            default: https://${PUBLIC_DOMAIN}
+            default: ${APP_URL}
             expose: false
           ALLOW_SIGNUP:
             default: "true"
@@ -229,6 +230,7 @@ spec:
       template: PREBUILT_V2
       dependencies:
         - backend
+        - gateway
       spec:
         source:
           image: ghcr.io/multica-ai/multica-web:latest
@@ -248,9 +250,6 @@ spec:
       icon: https://raw.githubusercontent.com/multica-ai/multica/main/docs/assets/logo-dark.svg
       template: PREBUILT_V2
       domainKey: PUBLIC_DOMAIN
-      dependencies:
-        - frontend
-        - backend
       spec:
         source:
           image: caddy:2-alpine
@@ -258,6 +257,10 @@ spec:
           - id: proxy
             port: 3000
             type: HTTP
+        env:
+          APP_URL:
+            default: ${ZEABUR_WEB_URL}
+            expose: true
         configs:
           - path: /etc/caddy/Caddyfile
             template: |-
